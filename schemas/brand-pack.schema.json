@@ -7,50 +7,28 @@
   "additionalProperties": false,
   "required": ["schemaVersion", "brand", "sources", "identity", "voice", "experience", "evidence"],
   "properties": {
-    "schemaVersion": { "type": "string", "const": "0.1.0" },
+    "schemaVersion": { "const": "0.1.0" },
+    "generatedAt": { "type": "string", "format": "date-time" },
     "brand": { "$ref": "#/$defs/brand" },
-    "sources": {
-      "type": "array",
-      "minItems": 1,
-      "items": { "$ref": "#/$defs/source" }
-    },
+    "sources": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/source" } },
     "identity": { "$ref": "#/$defs/identity" },
     "voice": { "$ref": "#/$defs/voice" },
     "experience": { "$ref": "#/$defs/experience" },
-    "assets": {
-      "type": "array",
-      "items": { "$ref": "#/$defs/asset" },
-      "default": []
-    },
-    "evidence": {
-      "type": "array",
-      "items": { "$ref": "evidence.schema.json" },
-      "minItems": 1
-    },
-    "unknowns": {
-      "type": "array",
-      "items": { "$ref": "#/$defs/unknown" },
-      "default": []
-    },
-    "ownerReview": { "$ref": "#/$defs/ownerReview" },
-    "generatedAt": { "type": "string", "format": "date-time" }
+    "assets": { "type": "array", "items": { "$ref": "#/$defs/asset" }, "default": [] },
+    "evidence": { "$ref": "evidence.schema.json" },
+    "unknowns": { "type": "array", "items": { "$ref": "#/$defs/unknown" }, "default": [] },
+    "ownerReview": { "$ref": "#/$defs/ownerReview" }
   },
   "$defs": {
-    "evidencePointer": {
-      "type": "string",
-      "pattern": "^[A-Za-z0-9._:-]+$"
-    },
+    "id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$" },
+    "evidenceIds": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/id" } },
     "evidencedString": {
       "type": "object",
       "additionalProperties": false,
       "required": ["value", "evidenceIds"],
       "properties": {
         "value": { "type": "string", "minLength": 1 },
-        "evidenceIds": {
-          "type": "array",
-          "minItems": 1,
-          "items": { "$ref": "#/$defs/evidencePointer" }
-        }
+        "evidenceIds": { "$ref": "#/$defs/evidenceIds" }
       }
     },
     "brand": {
@@ -71,7 +49,7 @@
       "additionalProperties": false,
       "required": ["id", "type", "location", "authorization"],
       "properties": {
-        "id": { "$ref": "#/$defs/evidencePointer" },
+        "id": { "$ref": "#/$defs/id" },
         "type": { "enum": ["website", "brand-guide", "logo", "stylesheet", "design-tokens", "manual-input", "other"] },
         "location": { "type": "string", "minLength": 1 },
         "authorization": { "enum": ["owner-provided", "owner-authorized", "public-reference", "unknown"] },
@@ -83,21 +61,17 @@
       "additionalProperties": false,
       "required": ["colors", "typography"],
       "properties": {
-        "colors": {
-          "type": "array",
-          "items": { "$ref": "#/$defs/colorToken" },
-          "minItems": 1
-        },
+        "colors": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/color" } },
         "typography": { "$ref": "#/$defs/typography" },
         "spacing": { "$ref": "#/$defs/tokenScale" },
         "radii": { "$ref": "#/$defs/tokenScale" },
         "shadows": { "$ref": "#/$defs/tokenScale" },
-        "motion": { "$ref": "#/$defs/motion" },
+        "motion": { "$ref": "#/$defs/guidance" },
         "imagery": { "$ref": "#/$defs/guidance" },
         "iconography": { "$ref": "#/$defs/guidance" }
       }
     },
-    "colorToken": {
+    "color": {
       "type": "object",
       "additionalProperties": false,
       "required": ["name", "value", "role", "evidenceIds"],
@@ -107,7 +81,7 @@
         "role": { "enum": ["primary", "secondary", "accent", "surface", "text", "border", "success", "warning", "error", "info", "other"] },
         "usage": { "type": "array", "items": { "type": "string" } },
         "avoid": { "type": "array", "items": { "type": "string" } },
-        "evidenceIds": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/evidencePointer" } }
+        "evidenceIds": { "$ref": "#/$defs/evidenceIds" }
       }
     },
     "typography": {
@@ -115,44 +89,24 @@
       "additionalProperties": false,
       "required": ["families", "roles"],
       "properties": {
-        "families": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": ["name", "fallbacks", "evidenceIds"],
-            "properties": {
-              "name": { "type": "string" },
-              "fallbacks": { "type": "array", "items": { "type": "string" } },
-              "source": { "type": "string" },
-              "evidenceIds": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/evidencePointer" } }
-            }
-          }
-        },
-        "roles": {
-          "type": "object",
-          "additionalProperties": { "type": "string" },
-          "minProperties": 1
-        }
+        "families": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/fontFamily" } },
+        "roles": { "type": "object", "minProperties": 1, "additionalProperties": { "type": "string" } }
+      }
+    },
+    "fontFamily": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "fallbacks", "evidenceIds"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "fallbacks": { "type": "array", "items": { "type": "string" } },
+        "source": { "type": "string" },
+        "evidenceIds": { "$ref": "#/$defs/evidenceIds" }
       }
     },
     "tokenScale": {
       "type": "object",
-      "additionalProperties": {
-        "oneOf": [
-          { "type": "string" },
-          { "type": "number" }
-        ]
-      }
-    },
-    "motion": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "principles": { "type": "array", "items": { "type": "string" } },
-        "durations": { "$ref": "#/$defs/tokenScale" },
-        "easings": { "$ref": "#/$defs/tokenScale" }
-      }
+      "additionalProperties": { "oneOf": [{ "type": "string" }, { "type": "number" }] }
     },
     "guidance": {
       "type": "object",
@@ -160,7 +114,7 @@
       "properties": {
         "prefer": { "type": "array", "items": { "type": "string" } },
         "avoid": { "type": "array", "items": { "type": "string" } },
-        "evidenceIds": { "type": "array", "items": { "$ref": "#/$defs/evidencePointer" } }
+        "evidenceIds": { "$ref": "#/$defs/evidenceIds" }
       }
     },
     "voice": {
@@ -193,12 +147,12 @@
       "additionalProperties": false,
       "required": ["id", "type", "location", "usage", "evidenceIds"],
       "properties": {
-        "id": { "$ref": "#/$defs/evidencePointer" },
+        "id": { "$ref": "#/$defs/id" },
         "type": { "enum": ["logo", "logo-mark", "wordmark", "favicon", "photography", "illustration", "icon", "font", "other"] },
         "location": { "type": "string" },
         "usage": { "type": "array", "items": { "type": "string" } },
         "restrictions": { "type": "array", "items": { "type": "string" } },
-        "evidenceIds": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/evidencePointer" } }
+        "evidenceIds": { "$ref": "#/$defs/evidenceIds" }
       }
     },
     "unknown": {
@@ -206,7 +160,7 @@
       "additionalProperties": false,
       "required": ["id", "question", "impact"],
       "properties": {
-        "id": { "$ref": "#/$defs/evidencePointer" },
+        "id": { "$ref": "#/$defs/id" },
         "question": { "type": "string", "minLength": 1 },
         "impact": { "enum": ["blocking", "material", "minor"] },
         "recommendedAction": { "type": "string" }
@@ -215,6 +169,7 @@
     "ownerReview": {
       "type": "object",
       "additionalProperties": false,
+      "required": ["status"],
       "properties": {
         "status": { "enum": ["not-started", "in-progress", "confirmed", "confirmed-with-corrections"] },
         "reviewedAt": { "type": "string", "format": "date-time" },
