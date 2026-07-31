@@ -1,0 +1,324 @@
+{
+  "schemaVersion": "0.1.0",
+  "generatedAt": "2026-07-31T15:46:00Z",
+  "brand": {
+    "name": "Harborlight Camp",
+    "slug": "harborlight-camp",
+    "website": "https://example.com",
+    "tagline": {
+      "value": "Adventure families can trust.",
+      "evidenceIds": ["ev.tagline"]
+    },
+    "summary": {
+      "value": "A fictional youth camp brand used only to demonstrate Brand Importer output structure.",
+      "evidenceIds": ["ev.summary"]
+    }
+  },
+  "sources": [
+    {
+      "id": "src.manual",
+      "type": "manual-input",
+      "location": "examples/01-synthetic-camp/source-notes.md",
+      "authorization": "owner-provided",
+      "capturedAt": "2026-07-31T15:46:00Z"
+    }
+  ],
+  "identity": {
+    "colors": [
+      {
+        "name": "Harbor Navy",
+        "value": "#12324A",
+        "role": "primary",
+        "usage": ["navigation", "primary text", "high-trust actions"],
+        "avoid": ["large dark backgrounds behind dense body copy"],
+        "evidenceIds": ["ev.color.primary"]
+      },
+      {
+        "name": "Signal Coral",
+        "value": "#F47A61",
+        "role": "accent",
+        "usage": ["primary calls to action", "status emphasis"],
+        "avoid": ["error states", "long-form text"],
+        "evidenceIds": ["ev.color.accent"]
+      },
+      {
+        "name": "Sand Surface",
+        "value": "#FFF8EC",
+        "role": "surface",
+        "usage": ["page backgrounds", "cards"],
+        "evidenceIds": ["ev.color.surface"]
+      }
+    ],
+    "typography": {
+      "families": [
+        {
+          "name": "Inter",
+          "fallbacks": ["system-ui", "sans-serif"],
+          "source": "https://fonts.google.com/specimen/Inter",
+          "evidenceIds": ["ev.font.primary"]
+        }
+      ],
+      "roles": {
+        "display": "Inter",
+        "heading": "Inter",
+        "body": "Inter",
+        "label": "Inter"
+      }
+    },
+    "spacing": {
+      "xs": "0.25rem",
+      "sm": "0.5rem",
+      "md": "1rem",
+      "lg": "1.5rem",
+      "xl": "2rem"
+    },
+    "radii": {
+      "sm": "0.5rem",
+      "md": "0.875rem",
+      "lg": "1.25rem"
+    },
+    "imagery": {
+      "prefer": ["candid outdoor activity", "visible supervision", "children shown with agency and joy"],
+      "avoid": ["staged corporate stock photography", "fear-based safety imagery"],
+      "evidenceIds": ["ev.imagery"]
+    }
+  },
+  "voice": {
+    "qualities": [
+      { "value": "warm", "evidenceIds": ["ev.voice.warm"] },
+      { "value": "clear", "evidenceIds": ["ev.voice.clear"] },
+      { "value": "reassuring without minimizing risk", "evidenceIds": ["ev.voice.reassuring"] }
+    ],
+    "principles": [
+      {
+        "value": "Explain what happens next before asking families to commit.",
+        "evidenceIds": ["ev.voice.next-step"]
+      },
+      {
+        "value": "Use direct language for safety, pickup, delays, and responsibility.",
+        "evidenceIds": ["ev.voice.safety"]
+      }
+    ],
+    "preferredVocabulary": [
+      { "value": "your child", "evidenceIds": ["ev.words.child"] },
+      { "value": "safe release", "evidenceIds": ["ev.words.release"] }
+    ],
+    "avoidVocabulary": [
+      { "value": "don't worry", "evidenceIds": ["ev.words.avoid-worry"] }
+    ],
+    "ctaPattern": {
+      "value": "Use specific, calm actions such as Review pickup details or Confirm authorized adult.",
+      "evidenceIds": ["ev.cta"]
+    }
+  },
+  "experience": {
+    "brandPromise": {
+      "value": "Families can understand where their child is, what is happening, and who is responsible at every consequential moment.",
+      "evidenceIds": ["ev.promise"]
+    },
+    "desiredOutcomes": [
+      { "value": "Parents feel informed and able to act.", "evidenceIds": ["ev.outcome.parent"] },
+      { "value": "Staff feel supported by clear shared procedures.", "evidenceIds": ["ev.outcome.staff"] },
+      { "value": "Children experience freedom within visible safeguards.", "evidenceIds": ["ev.outcome.child"] }
+    ],
+    "trustPrinciples": [
+      { "value": "Never imply a child has been released until the release event is verified.", "evidenceIds": ["ev.trust.release"] },
+      { "value": "Surface delays and uncertainty rather than covering them with reassuring copy.", "evidenceIds": ["ev.trust.delay"] }
+    ],
+    "interactionPrinciples": [
+      { "value": "Consequential actions require explicit status, actor, and timestamp.", "evidenceIds": ["ev.interaction.status"] }
+    ],
+    "recoveryPrinciples": [
+      { "value": "Every missed handoff provides a visible escalation path and correction record.", "evidenceIds": ["ev.recovery"] }
+    ]
+  },
+  "assets": [],
+  "evidence": {
+    "schemaVersion": "0.1.0",
+    "generatedAt": "2026-07-31T15:46:00Z",
+    "records": [
+      {
+        "id": "ev.tagline",
+        "subjectPath": "/brand/tagline",
+        "status": "owner_confirmed",
+        "summary": "Synthetic example tagline supplied for the fixture.",
+        "sources": [{ "sourceType": "owner_input", "locator": "source-notes.md#tagline" }]
+      },
+      {
+        "id": "ev.summary",
+        "subjectPath": "/brand/summary",
+        "status": "observed_source",
+        "summary": "Fixture disclosure describing the example as fictional.",
+        "sources": [{ "sourceType": "source_code", "locator": "examples/01-synthetic-camp/brand-pack.json" }]
+      },
+      {
+        "id": "ev.color.primary",
+        "subjectPath": "/identity/colors/0",
+        "status": "owner_confirmed",
+        "summary": "Primary navy selected for the synthetic fixture.",
+        "sources": [{ "sourceType": "owner_input", "locator": "source-notes.md#colors" }]
+      },
+      {
+        "id": "ev.color.accent",
+        "subjectPath": "/identity/colors/1",
+        "status": "owner_confirmed",
+        "summary": "Accent coral selected for the synthetic fixture.",
+        "sources": [{ "sourceType": "owner_input", "locator": "source-notes.md#colors" }]
+      },
+      {
+        "id": "ev.color.surface",
+        "subjectPath": "/identity/colors/2",
+        "status": "owner_confirmed",
+        "summary": "Warm neutral surface selected for the synthetic fixture.",
+        "sources": [{ "sourceType": "owner_input", "locator": "source-notes.md#colors" }]
+      },
+      {
+        "id": "ev.font.primary",
+        "subjectPath": "/identity/typography/families/0",
+        "status": "owner_confirmed",
+        "summary": "Inter selected as the fixture type family.",
+        "sources": [{ "sourceType": "owner_input", "locator": "source-notes.md#typography" }]
+      },
+      {
+        "id": "ev.imagery",
+        "subjectPath": "/identity/imagery",
+        "status": "inferred",
+        "summary": "Imagery guidance inferred from the fictional camp's trust and adventure goals.",
+        "sources": [{ "sourceType": "owner_input", "locator": "source-notes.md#experience" }],
+        "review": { "required": true, "reason": "No real image library was supplied." }
+      },
+      {
+        "id": "ev.voice.warm",
+        "subjectPath": "/voice/qualities/0",
+        "status": "owner_confirmed",
+        "summary": "Warmth is an explicit fixture voice quality.",
+        "sources": [{ "sourceType": "owner_input", "locator": "source-notes.md#voice" }]
+      },
+      {
+        "id": "ev.voice.clear",
+        "subjectPath": "/voice/qualities/1",
+        "status": "owner_confirmed",
+        "summary": "Clarity is an explicit fixture voice quality.",
+        "sources": [{ "sourceType": "owner_input", "locator": "source-notes.md#voice" }]
+      },
+      {
+        "id": "ev.voice.reassuring",
+        "subjectPath": "/voice/qualities/2",
+        "status": "derived",
+        "summary": "Reassurance is constrained by the trust requirement to disclose risk and uncertainty.",
+        "sources": [{ "sourceType": "calculation", "locator": "voice-quality synthesis" }]
+      },
+      {
+        "id": "ev.voice.next-step",
+        "subjectPath": "/voice/principles/0",
+        "status": "derived",
+        "summary": "Next-step language follows from the fixture's informed-choice goal.",
+        "sources": [{ "sourceType": "calculation", "locator": "experience-to-voice mapping" }]
+      },
+      {
+        "id": "ev.voice.safety",
+        "subjectPath": "/voice/principles/1",
+        "status": "owner_confirmed",
+        "summary": "Direct safety language is a stated fixture requirement.",
+        "sources": [{ "sourceType": "owner_input", "locator": "source-notes.md#safety" }]
+      },
+      {
+        "id": "ev.words.child",
+        "subjectPath": "/voice/preferredVocabulary/0",
+        "status": "derived",
+        "summary": "Human-specific wording is preferred over record-centric labels.",
+        "sources": [{ "sourceType": "calculation", "locator": "language guidance" }]
+      },
+      {
+        "id": "ev.words.release",
+        "subjectPath": "/voice/preferredVocabulary/1",
+        "status": "owner_confirmed",
+        "summary": "Safe release is a defined experience stage.",
+        "sources": [{ "sourceType": "owner_input", "locator": "source-notes.md#safety" }]
+      },
+      {
+        "id": "ev.words.avoid-worry",
+        "subjectPath": "/voice/avoidVocabulary/0",
+        "status": "derived",
+        "summary": "Blanket reassurance would conceal uncertainty rather than earn trust.",
+        "sources": [{ "sourceType": "calculation", "locator": "LumynQ trust review" }]
+      },
+      {
+        "id": "ev.cta",
+        "subjectPath": "/voice/ctaPattern",
+        "status": "derived",
+        "summary": "Specific calm actions align voice with consequential system behavior.",
+        "sources": [{ "sourceType": "calculation", "locator": "voice-to-interaction mapping" }]
+      },
+      {
+        "id": "ev.promise",
+        "subjectPath": "/experience/brandPromise",
+        "status": "owner_confirmed",
+        "summary": "The fixture centers visibility and responsibility throughout the child journey.",
+        "sources": [{ "sourceType": "owner_input", "locator": "source-notes.md#promise" }]
+      },
+      {
+        "id": "ev.outcome.parent",
+        "subjectPath": "/experience/desiredOutcomes/0",
+        "status": "owner_confirmed",
+        "summary": "Parent informed agency is an explicit outcome.",
+        "sources": [{ "sourceType": "owner_input", "locator": "source-notes.md#outcomes" }]
+      },
+      {
+        "id": "ev.outcome.staff",
+        "subjectPath": "/experience/desiredOutcomes/1",
+        "status": "owner_confirmed",
+        "summary": "Staff procedural support is an explicit outcome.",
+        "sources": [{ "sourceType": "owner_input", "locator": "source-notes.md#outcomes" }]
+      },
+      {
+        "id": "ev.outcome.child",
+        "subjectPath": "/experience/desiredOutcomes/2",
+        "status": "inferred",
+        "summary": "Child freedom within safeguards is a plausible outcome requiring validation.",
+        "sources": [{ "sourceType": "owner_input", "locator": "source-notes.md#outcomes" }],
+        "review": { "required": true, "reason": "The fixture does not include direct child research." }
+      },
+      {
+        "id": "ev.trust.release",
+        "subjectPath": "/experience/trustPrinciples/0",
+        "status": "owner_confirmed",
+        "summary": "Release status must be grounded in a verified event.",
+        "sources": [{ "sourceType": "owner_input", "locator": "source-notes.md#safety" }]
+      },
+      {
+        "id": "ev.trust.delay",
+        "subjectPath": "/experience/trustPrinciples/1",
+        "status": "derived",
+        "summary": "Truthful delay disclosure is required to preserve trust.",
+        "sources": [{ "sourceType": "calculation", "locator": "LumynQ trust review" }]
+      },
+      {
+        "id": "ev.interaction.status",
+        "subjectPath": "/experience/interactionPrinciples/0",
+        "status": "derived",
+        "summary": "Actor and timestamp make consequential handoffs traceable.",
+        "sources": [{ "sourceType": "calculation", "locator": "chain-of-custody model" }]
+      },
+      {
+        "id": "ev.recovery",
+        "subjectPath": "/experience/recoveryPrinciples/0",
+        "status": "derived",
+        "summary": "Missed handoffs require visible recovery rather than silent correction.",
+        "sources": [{ "sourceType": "calculation", "locator": "LumynQ recovery review" }]
+      }
+    ]
+  },
+  "unknowns": [
+    {
+      "id": "unknown.logo-clearspace",
+      "question": "What minimum clear-space rule should protect the logo?",
+      "impact": "minor",
+      "recommendedAction": "Confirm during owner review after a real logo is supplied."
+    }
+  ],
+  "ownerReview": {
+    "status": "not-started",
+    "notes": ["This is a fictional fixture, not an imported real-world brand."]
+  }
+}
