@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://brand-importer.dev/schemas/evidence.schema.json",
+  "title": "Brand Importer Evidence Records",
+  "description": "Provenance and epistemic status for consequential Brand Pack decisions.",
+  "type": "object",
+  "required": ["schemaVersion", "records"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "0.1.0"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "records": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/evidenceRecord" }
+    }
+  },
+  "$defs": {
+    "evidenceStatus": {
+      "type": "string",
+      "enum": [
+        "observed_live",
+        "observed_source",
+        "derived",
+        "inferred",
+        "owner_confirmed",
+        "owner_corrected",
+        "unknown"
+      ]
+    },
+    "sourceReference": {
+      "type": "object",
+      "required": ["sourceType", "locator"],
+      "additionalProperties": false,
+      "properties": {
+        "sourceType": {
+          "type": "string",
+          "enum": [
+            "website",
+            "brand_guide",
+            "stylesheet",
+            "design_tokens",
+            "source_code",
+            "asset",
+            "owner_input",
+            "calculation",
+            "other"
+          ]
+        },
+        "locator": {
+          "type": "string",
+          "minLength": 1
+        },
+        "capturedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "selector": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "evidenceRecord": {
+      "type": "object",
+      "required": ["id", "subjectPath", "status", "summary", "sources"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]*$"
+        },
+        "subjectPath": {
+          "type": "string",
+          "description": "JSON Pointer-like path to the Brand Pack value supported by this record.",
+          "minLength": 1
+        },
+        "status": {
+          "$ref": "#/$defs/evidenceStatus"
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sources": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/sourceReference" }
+        },
+        "method": {
+          "type": "string",
+          "description": "Extraction, calculation, or interpretation method when relevant."
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Optional machine confidence. Never substitutes for evidence status."
+        },
+        "conflictsWith": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "supersedes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "review": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "required": { "type": "boolean" },
+            "reason": { "type": "string" },
+            "reviewedAt": { "type": "string", "format": "date-time" },
+            "reviewerRole": { "type": "string" },
+            "decisionNote": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}
