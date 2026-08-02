@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://brand-importer.dev/schemas/import-request.schema.json",
+  "title": "Brand Import Request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "requestId", "sources", "authorization", "requestedOutputs"],
+  "properties": {
+    "schemaVersion": { "const": "0.1.0" },
+    "requestId": { "type": "string", "pattern": "^[A-Za-z0-9._:-]+$" },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "type", "location"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[A-Za-z0-9._:-]+$" },
+          "type": { "enum": ["website", "brand-guide", "logo", "stylesheet", "design-tokens", "manual-input", "other"] },
+          "location": { "type": "string", "minLength": 1 },
+          "note": { "type": "string" }
+        }
+      }
+    },
+    "authorization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "assertedBy"],
+      "properties": {
+        "status": { "enum": ["owner-provided", "owner-authorized", "public-reference", "unknown"] },
+        "assertedBy": { "type": "string", "minLength": 1 },
+        "note": { "type": "string" }
+      }
+    },
+    "requestedOutputs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "enum": ["brand-pack", "css", "tailwind", "report"] }
+    },
+    "ownerContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "productType": { "type": "string" },
+        "audiences": { "type": "array", "items": { "type": "string" } },
+        "knownConstraints": { "type": "array", "items": { "type": "string" } },
+        "ownerNotes": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "createdAt": { "type": "string", "format": "date-time" }
+  }
+}
