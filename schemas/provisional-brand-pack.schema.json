@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://brand-importer.dev/schemas/provisional-brand-pack.schema.json",
+  "title": "Provisional Brand Pack",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "requestId", "status", "generatedAt", "brand", "identity", "assets", "voice", "experience", "unknowns", "ownerReview"],
+  "properties": {
+    "schemaVersion": { "const": "0.1.0" },
+    "requestId": { "type": "string", "minLength": 1 },
+    "status": { "const": "provisional" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "brand": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "website"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "website": { "type": "string", "format": "uri" },
+        "description": { "$ref": "#/$defs/provisionalValue" }
+      }
+    },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["colorCandidates", "typographyCandidates"],
+      "properties": {
+        "colorCandidates": { "type": "array", "items": { "$ref": "#/$defs/candidateRef" } },
+        "typographyCandidates": { "type": "array", "items": { "$ref": "#/$defs/candidateRef" } },
+        "imageryGuidance": { "$ref": "#/$defs/provisionalValue" }
+      }
+    },
+    "assets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["logoCandidates", "imageryCandidates"],
+      "properties": {
+        "logoCandidates": { "type": "array", "items": { "$ref": "#/$defs/candidateRef" } },
+        "imageryCandidates": { "type": "array", "items": { "$ref": "#/$defs/candidateRef" } }
+      }
+    },
+    "voice": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["qualities", "principles", "ctaPattern"],
+      "properties": {
+        "qualities": { "type": "array", "items": { "$ref": "#/$defs/provisionalValue" } },
+        "principles": { "type": "array", "items": { "$ref": "#/$defs/provisionalValue" } },
+        "ctaPattern": { "$ref": "#/$defs/provisionalValue" }
+      }
+    },
+    "experience": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["brandPromise", "desiredOutcomes", "trustPrinciples"],
+      "properties": {
+        "brandPromise": { "$ref": "#/$defs/provisionalValue" },
+        "desiredOutcomes": { "type": "array", "items": { "$ref": "#/$defs/provisionalValue" } },
+        "trustPrinciples": { "type": "array", "items": { "$ref": "#/$defs/provisionalValue" } }
+      }
+    },
+    "unknowns": { "type": "array", "items": { "$ref": "#/$defs/unknown" } },
+    "ownerReview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "sessionFile"],
+      "properties": {
+        "status": { "const": "not-started" },
+        "sessionFile": { "type": "string", "minLength": 1 }
+      }
+    }
+  },
+  "$defs": {
+    "candidateRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidateId", "score", "recommendedRole", "evidenceIds", "requiresOwnerReview"],
+      "properties": {
+        "candidateId": { "type": "string", "minLength": 1 },
+        "score": { "type": "number", "minimum": 0, "maximum": 1 },
+        "recommendedRole": { "type": "string", "minLength": 1 },
+        "evidenceIds": { "type": "array", "minItems": 1, "items": { "type": "string" }, "uniqueItems": true },
+        "requiresOwnerReview": { "const": true },
+        "restrictions": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "provisionalValue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "status", "evidenceIds", "requiresOwnerReview", "rationale"],
+      "properties": {
+        "value": { "type": "string", "minLength": 1 },
+        "status": { "const": "inferred" },
+        "evidenceIds": { "type": "array", "minItems": 1, "items": { "type": "string" }, "uniqueItems": true },
+        "requiresOwnerReview": { "const": true },
+        "rationale": { "type": "string", "minLength": 1 }
+      }
+    },
+    "unknown": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "question", "impact"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "question": { "type": "string", "minLength": 1 },
+        "impact": { "enum": ["blocking", "material", "minor"] },
+        "recommendedAction": { "type": "string" },
+        "references": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}
