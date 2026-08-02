@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://brand-importer.dev/schemas/source-inventory.schema.json",
+  "title": "Brand Source Inventory",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "requestId", "capturedAt", "items"],
+  "properties": {
+    "schemaVersion": { "const": "0.1.0" },
+    "requestId": { "type": "string" },
+    "capturedAt": { "type": "string", "format": "date-time" },
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "sourceId", "type", "location", "status"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[A-Za-z0-9._:-]+$" },
+          "sourceId": { "type": "string" },
+          "type": { "enum": ["page", "stylesheet", "script", "logo", "image", "font", "metadata", "document", "other"] },
+          "location": { "type": "string", "minLength": 1 },
+          "status": { "enum": ["inspected", "discovered-not-inspected", "blocked", "failed", "unsupported"] },
+          "httpStatus": { "type": "integer", "minimum": 100, "maximum": 599 },
+          "mediaType": { "type": "string" },
+          "title": { "type": "string" },
+          "selectors": { "type": "array", "items": { "type": "string" } },
+          "notes": { "type": "array", "items": { "type": "string" } },
+          "error": { "type": "string" }
+        }
+      }
+    }
+  }
+}
