@@ -1,14 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { canonicalizeColor, normalizeColors } from '../src/normalize/colors.mjs';
-import { normalizeTypography } from '../src/normalize/typography.mjs';
+import { findUnresolvedFontReferences, normalizeTypography } from '../src/normalize/typography.mjs';
 import { normalizeAssets } from '../src/normalize/assets.mjs';
 import { normalizeImagery } from '../src/normalize/imagery.mjs';
 import { normalizeImport } from '../src/normalize/index.mjs';
 
-test('canonicalizeColor merges equivalent hex and rgb values',()=>{
+test('canonicalizeColor merges equivalent values and rejects unresolved functions',()=>{
  assert.equal(canonicalizeColor('#fff'),'#ffffff');
  assert.equal(canonicalizeColor('rgb(255, 79, 79)'),'#ff4f4f');
+ assert.equal(canonicalizeColor('rgb(var(--color-foreground)'),null);
+ assert.equal(canonicalizeColor('rgb(var(--color-foreground))'),null);
+ assert.equal(canonicalizeColor('not-a-color'),null);
 });
 
 test('normalizers preserve provisional owner-review boundary',()=>{
@@ -17,6 +20,16 @@ test('normalizers preserve provisional owner-review boundary',()=>{
  const colors=normalizeColors(observations,evidence); assert.equal(colors.length,1); assert.equal(colors[0].occurrences,5); assert.equal(colors[0].status,'derived'); assert.equal(colors[0].requiresOwnerReview,true);
  const fonts=normalizeTypography(observations,evidence); assert.equal(fonts.find(f=>f.family==='Icon Font').excludedFromBrandTypography,true); assert.equal(fonts.find(f=>f.family==='sans-serif').candidateRoles[0],'fallback');
  const assets=normalizeAssets(observations,evidence); assert.ok(assets[0].candidateRoles.includes('primary-logo')); assert.equal(assets[0].requiresOwnerReview,true);
+});
+
+test('unresolved font variables are excluded from candidates and surfaced',()=>{
+ const observations={fonts:[{value:'var(--font-heading-family)',count:5},{value:'Poppins',count:2}]};
+ assert.deepEqual(findUnresolvedFontReferences(observations),['var(--font-heading-family)']);
+ const fonts=normalizeTypography(observations,{records:[{id:'ev.font.raw.2',summary:'Observed font family Poppins.'}]});
+ assert.equal(fonts.some(font=>font.family.includes('var(')),false);
+ const result=normalizeImport({request:{requestId:'font-vars'},observations:{...observations,colors:[],likelyLogos:[],images:[]},evidence:{records:[{id:'ev.font.raw.2',summary:'Observed font family Poppins.'}]}});
+ assert.equal(result.unknowns.some(item=>item.id==='unknown.font-variables'),true);
+ assert.match(result.unknowns.find(item=>item.id==='unknown.font-variables').recommendedAction,/--font-heading-family/);
 });
 
 test('imagery normalization ranks useful images and protects people and rights',()=>{
