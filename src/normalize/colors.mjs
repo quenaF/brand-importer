@@ -9,6 +9,7 @@ function clampByte(value) {
 export function canonicalizeColor(input) {
   if (typeof input !== 'string') return null;
   const value = input.trim().toLowerCase();
+  if (!value || /var\(/i.test(value)) return null;
   if (NAMED.has(value)) return NAMED.get(value);
   if (/^#[0-9a-f]{3}$/.test(value)) return `#${[...value.slice(1)].map((c) => c + c).join('')}`;
   if (/^#[0-9a-f]{6}$/.test(value)) return value;
@@ -21,7 +22,7 @@ export function canonicalizeColor(input) {
     }
     return `#${hex}`;
   }
-  return value.startsWith('var(') ? null : value;
+  return null;
 }
 
 function luminance(hex) {
