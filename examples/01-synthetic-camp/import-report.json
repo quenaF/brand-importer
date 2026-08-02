@@ -1,0 +1,54 @@
+{
+  "schemaVersion": "0.1.0",
+  "requestId": "req.harborlight.001",
+  "status": "review-required",
+  "summary": {
+    "inspectedSources": 1,
+    "evidenceRecords": 24,
+    "ownerDecisionsRequired": 2,
+    "warnings": 1
+  },
+  "findings": [
+    {
+      "id": "finding.identity.palette",
+      "category": "identity",
+      "status": "confirmed",
+      "message": "The synthetic source defines a primary, accent, and surface palette.",
+      "evidenceIds": ["ev.color.primary", "ev.color.accent", "ev.color.surface"],
+      "subjectPath": "/identity/colors"
+    },
+    {
+      "id": "finding.imagery.review",
+      "category": "experience",
+      "status": "candidate",
+      "message": "Imagery guidance is inferred because no real image library was supplied.",
+      "evidenceIds": ["ev.imagery"],
+      "subjectPath": "/identity/imagery",
+      "recommendedAction": "Confirm or correct imagery guidance during owner review."
+    },
+    {
+      "id": "finding.accessibility.pending",
+      "category": "accessibility",
+      "status": "warning",
+      "message": "Color roles are defined, but rendered component contrast has not been tested.",
+      "evidenceIds": [],
+      "recommendedAction": "Run contrast checks against generated component states before production use."
+    }
+  ],
+  "unknowns": [
+    {
+      "id": "unknown.logo-clearspace",
+      "question": "What minimum clear-space rule should protect the logo?",
+      "impact": "minor",
+      "recommendedAction": "Confirm after a real logo is supplied."
+    }
+  ],
+  "artifacts": [
+    { "type": "brand-pack", "location": "brand-pack.json", "status": "generated" },
+    { "type": "owner-review", "location": "owner-review.json", "status": "generated" },
+    { "type": "report", "location": "import-report.json", "status": "generated" },
+    { "type": "css", "location": "implementation/theme.css", "status": "withheld", "note": "Exporter not implemented yet." },
+    { "type": "tailwind", "location": "implementation/tailwind.preset.ts", "status": "withheld", "note": "Exporter not implemented yet." }
+  ],
+  "generatedAt": "2026-07-31T15:46:00Z"
+}
