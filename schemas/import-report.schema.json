@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://brand-importer.dev/schemas/import-report.schema.json",
+  "title": "Brand Import Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "requestId", "status", "summary", "findings", "unknowns"],
+  "properties": {
+    "schemaVersion": { "const": "0.1.0" },
+    "requestId": { "type": "string" },
+    "status": { "enum": ["provisional", "review-required", "blocked", "reviewed", "production-ready", "failed"] },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["inspectedSources", "evidenceRecords", "ownerDecisionsRequired"],
+      "properties": {
+        "inspectedSources": { "type": "integer", "minimum": 0 },
+        "evidenceRecords": { "type": "integer", "minimum": 0 },
+        "ownerDecisionsRequired": { "type": "integer", "minimum": 0 },
+        "warnings": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "category", "status", "message", "evidenceIds"],
+        "properties": {
+          "id": { "type": "string" },
+          "category": { "enum": ["identity", "voice", "experience", "accessibility", "authorization", "conflict", "asset", "other"] },
+          "status": { "enum": ["confirmed", "candidate", "conflict", "warning", "blocked"] },
+          "message": { "type": "string", "minLength": 1 },
+          "evidenceIds": { "type": "array", "items": { "type": "string" } },
+          "subjectPath": { "type": "string" },
+          "recommendedAction": { "type": "string" }
+        }
+      }
+    },
+    "unknowns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "question", "impact"],
+        "properties": {
+          "id": { "type": "string" },
+          "question": { "type": "string", "minLength": 1 },
+          "impact": { "enum": ["blocking", "material", "minor"] },
+          "recommendedAction": { "type": "string" }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "location", "status"],
+        "properties": {
+          "type": { "enum": ["brand-pack", "evidence", "owner-review", "css", "tailwind", "report"] },
+          "location": { "type": "string" },
+          "status": { "enum": ["generated", "withheld", "failed"] },
+          "note": { "type": "string" }
+        }
+      }
+    },
+    "generatedAt": { "type": "string", "format": "date-time" }
+  }
+}
