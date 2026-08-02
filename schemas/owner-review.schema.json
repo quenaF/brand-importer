@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://brand-importer.dev/schemas/owner-review.schema.json",
+  "title": "Brand Owner Review",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "requestId", "status", "decisions"],
+  "properties": {
+    "schemaVersion": { "const": "0.1.0" },
+    "requestId": { "type": "string" },
+    "status": { "enum": ["not-started", "in-progress", "confirmed", "confirmed-with-corrections", "blocked"] },
+    "reviewer": { "type": "string" },
+    "reviewedAt": { "type": "string", "format": "date-time" },
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "subjectPath", "action"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[A-Za-z0-9._:-]+$" },
+          "subjectPath": { "type": "string", "minLength": 1 },
+          "action": { "enum": ["confirm", "correct", "replace", "deprioritize", "mark-unknown", "add-context"] },
+          "originalEvidenceIds": { "type": "array", "items": { "type": "string" } },
+          "replacementValue": {},
+          "note": { "type": "string" },
+          "decidedAt": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "blockingUnknownIds": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+  }
+}
