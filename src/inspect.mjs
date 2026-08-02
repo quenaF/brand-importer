@@ -2,6 +2,7 @@ import { extractCssEvidence, extractHtmlEvidence } from './extract.mjs';
 
 const DEFAULT_TIMEOUT_MS = 12000;
 const USER_AGENT = 'BrandImporter/0.1 (+https://github.com/quenaF/brand-importer)';
+const ALLOWED_AUTHORIZATION = new Set(['owner-provided', 'owner-authorized', 'public-reference']);
 
 async function fetchText(url, { timeoutMs = DEFAULT_TIMEOUT_MS } = {}) {
   const controller = new AbortController();
@@ -12,12 +13,13 @@ async function fetchText(url, { timeoutMs = DEFAULT_TIMEOUT_MS } = {}) {
       signal: controller.signal,
       headers: { 'user-agent': USER_AGENT, accept: 'text/html,text/css;q=0.9,*/*;q=0.1' }
     });
+    const text = await response.text();
     return {
       ok: response.ok,
       status: response.status,
       finalUrl: response.url || url,
       contentType: response.headers.get('content-type') ?? '',
-      text: await response.text()
+      text
     };
   } finally {
     clearTimeout(timer);
@@ -39,33 +41,53 @@ function evidenceRecord(id, subjectPath, summary, sourceType, locator, method) {
   };
 }
 
-function inventoryItem({ id, sourceId, type, location, status, httpStatus, mediaType, title, notes, error }) {
-  return Object.fromEntries(Object.entries({ id, sourceId, type, location, status, httpStatus, mediaType, title, notes, error }).filter(([, value]) => value !== undefined));
+export function resolveWebsiteSource(request) {
+  if (!request || typeof request !== 'object') throw new Error('A canonical import request object is required.');
+  if (request.schemaVersion !== '0.1.0') throw new Error('schemaVersion must be 0.1.0');
+  if (!request.requestId) throw new Error('requestId is required');
+
+  const authorizationStatus = request.authorization?.status;
+  if (!ALLOWED_AUTHORIZATION.has(authorizationStatus)) {
+    throw new Error('authorization.status must be owner-provided, owner-authorized, or public-reference');
+  }
+
+  const websiteSources = (request.sources ?? []).filter((source) => source.type === 'website');
+  if (websiteSources.length !== 1) {
+    throw new Error('Exactly one website source is required for v0.1 observed extraction.');
+  }
+
+  const source = websiteSources[0];
+  let url;
+  try {
+    url = new URL(source.location);
+  } catch {
+    throw new Error(`Website source '${source.id}' must contain a valid absolute URL.`);
+  }
+  if (!['http:', 'https:'].includes(url.protocol)) {
+    throw new Error(`Website source '${source.id}' must use http or https.`);
+  }
+
+  return { source, sourceUrl: url.toString(), authorizationStatus };
 }
 
 export async function inspectUrl(request) {
-  if (!request?.sourceUrl) throw new Error('sourceUrl is required');
-  if (!['owner-provided', 'owner-authorized', 'public-reference'].includes(request.authorization)) {
-    throw new Error('authorization must be owner-provided, owner-authorized, or public-reference');
-  }
-
-  const capturedAt = now();
+  const { source, sourceUrl } = resolveWebsiteSource(request);
+  const pageResult = await fetchText(sourceUrl);
   const items = [];
   const evidence = [];
-  const pageResult = await fetchText(request.sourceUrl);
-  const html = extractHtmlEvidence(pageResult.text, pageResult.finalUrl);
 
-  items.push(inventoryItem({
+  const html = extractHtmlEvidence(pageResult.text, pageResult.finalUrl);
+  items.push({
     id: 'page.home',
-    sourceId: request.primarySourceId ?? 'source.website',
+    sourceId: source.id,
     type: 'page',
     location: pageResult.finalUrl,
     status: pageResult.ok ? 'inspected' : 'failed',
     httpStatus: pageResult.status,
     mediaType: pageResult.contentType,
     title: html.page.title,
-    error: pageResult.ok ? undefined : 'Homepage could not be fetched successfully.'
-  }));
+    ...(pageResult.ok ? {} : { error: 'Homepage could not be fetched successfully.' })
+  });
 
   evidence.push(evidenceRecord('ev.page.title', '/observations/page/title', `Observed page title: ${html.page.title || '(empty)'}`, 'website', pageResult.finalUrl, 'HTML title extraction'));
   if (html.page.description) evidence.push(evidenceRecord('ev.page.description', '/observations/page/description', 'Observed meta description.', 'website', pageResult.finalUrl, 'HTML meta extraction'));
@@ -73,52 +95,46 @@ export async function inspectUrl(request) {
 
   for (const [index, logo] of html.likelyLogos.entries()) {
     const id = `asset.logo.${index + 1}`;
-    items.push(inventoryItem({
+    items.push({
       id,
-      sourceId: request.primarySourceId ?? 'source.website',
+      sourceId: source.id,
       type: 'logo',
       location: logo.src,
       status: 'discovered-not-inspected',
-      notes: [`alt=${logo.alt || '(empty)'}`, `class=${logo.className || '(empty)'}`, `elementId=${logo.id || '(empty)'}`]
-    }));
+      selectors: [logo.alt, logo.className, logo.id].filter(Boolean),
+      notes: ['Likely logo candidate identified from filename, alt text, class, or element id.']
+    });
     evidence.push(evidenceRecord(`ev.logo.${index + 1}`, `/observations/assets/${id}`, `Observed likely logo candidate ${logo.src}.`, 'asset', logo.src, 'Filename, alt text, class, or id matched logo/wordmark/brand'));
   }
 
   for (const [index, icon] of html.icons.entries()) {
-    items.push(inventoryItem({
-      id: `asset.icon.${index + 1}`,
-      sourceId: request.primarySourceId ?? 'source.website',
-      type: 'image',
-      location: icon,
-      status: 'discovered-not-inspected',
-      notes: ['Referenced by an icon link relation.']
-    }));
+    items.push({ id: `asset.icon.${index + 1}`, sourceId: source.id, type: 'image', location: icon, status: 'discovered-not-inspected', notes: ['Referenced as a page icon.'] });
   }
 
   const cssObservations = [html.inlineCss];
   for (const [index, stylesheetUrl] of html.stylesheets.entries()) {
     try {
       const cssResult = await fetchText(stylesheetUrl);
-      items.push(inventoryItem({
+      items.push({
         id: `asset.stylesheet.${index + 1}`,
-        sourceId: request.primarySourceId ?? 'source.website',
+        sourceId: source.id,
         type: 'stylesheet',
         location: cssResult.finalUrl,
         status: cssResult.ok ? 'inspected' : 'failed',
         httpStatus: cssResult.status,
         mediaType: cssResult.contentType,
-        error: cssResult.ok ? undefined : 'Stylesheet could not be fetched successfully.'
-      }));
+        ...(cssResult.ok ? {} : { error: 'Stylesheet could not be fetched successfully.' })
+      });
       if (cssResult.ok) cssObservations.push(extractCssEvidence(cssResult.text, cssResult.finalUrl));
     } catch (error) {
-      items.push(inventoryItem({
+      items.push({
         id: `asset.stylesheet.${index + 1}`,
-        sourceId: request.primarySourceId ?? 'source.website',
+        sourceId: source.id,
         type: 'stylesheet',
         location: stylesheetUrl,
         status: 'failed',
         error: error.message
-      }));
+      });
     }
   }
 
@@ -150,7 +166,7 @@ export async function inspectUrl(request) {
     sourceInventory: {
       schemaVersion: '0.1.0',
       requestId: request.requestId,
-      capturedAt,
+      capturedAt: now(),
       items
     },
     observations: {
