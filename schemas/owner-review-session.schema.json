@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://brand-importer.dev/schemas/owner-review-session.schema.json",
+  "title": "Owner Review Session",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "requestId", "status", "generatedAt", "questions"],
+  "properties": {
+    "schemaVersion": { "const": "0.1.0" },
+    "requestId": { "type": "string", "minLength": 1 },
+    "status": { "const": "not-started" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "questions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "category", "prompt", "impact", "candidateIds", "allowedActions", "whyItMatters"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[A-Za-z0-9._:-]+$" },
+          "category": { "enum": ["color", "typography", "logo", "imagery", "voice", "experience", "rights", "unknown"] },
+          "prompt": { "type": "string", "minLength": 1 },
+          "impact": { "enum": ["blocking", "material", "minor"] },
+          "candidateIds": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+          "evidenceIds": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+          "allowedActions": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "enum": ["confirm", "correct", "replace", "deprioritize", "mark-unknown", "add-context"] } },
+          "whyItMatters": { "type": "string", "minLength": 1 },
+          "suggestedAnswer": {},
+          "notes": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}
