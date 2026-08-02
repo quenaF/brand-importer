@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "0.1.0",
+  "requestId": "req.harborlight.001",
+  "capturedAt": "2026-07-31T15:45:00Z",
+  "items": [
+    {
+      "id": "inv.source-notes",
+      "sourceId": "src.manual",
+      "type": "document",
+      "location": "examples/01-synthetic-camp/source-notes.md",
+      "status": "inspected",
+      "mediaType": "text/markdown",
+      "title": "Harborlight Camp synthetic source notes",
+      "notes": ["Owner-provided fixture content; no live website was inspected."]
+    }
+  ]
+}
