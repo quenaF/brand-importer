@@ -49,7 +49,7 @@ function walkEvidenceRefs(value, pointer = '', found = []) {
       const next = `${pointer}/${key}`;
       if (key === 'evidenceIds' && Array.isArray(child)) {
         child.forEach((id) => found.push({ id, pointer: next }));
-      } else {
+      } else if (key !== 'evidence') {
         walkEvidenceRefs(child, next, found);
       }
     }
@@ -80,7 +80,9 @@ export function validateBundle(bundleDir) {
     }
   }
 
-  const evidenceIds = collectEvidenceIds(documents['evidence.json']);
+  const brandPack = documents['brand-pack.json'];
+  const evidence = documents['evidence.json'] ?? brandPack?.evidence;
+  const evidenceIds = collectEvidenceIds(evidence);
   for (const filename of ['brand-pack.json', 'import-report.json', 'owner-review.json']) {
     const document = documents[filename];
     if (!document) continue;
@@ -91,8 +93,6 @@ export function validateBundle(bundleDir) {
 
   const report = documents['import-report.json'];
   const review = documents['owner-review.json'];
-  const brandPack = documents['brand-pack.json'];
-
   const blockingUnknowns = (report?.unknowns ?? []).filter((item) => item.impact === 'blocking');
   if (report?.status === 'production-ready' && blockingUnknowns.length > 0) {
     errors.push('import-report.json: production-ready status is invalid while blocking unknowns remain');
