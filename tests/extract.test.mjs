@@ -30,7 +30,7 @@ test('extractHtmlEvidence finds metadata, stylesheets, logos, CTAs, and navigati
   assert.ok(result.inlineCss.fontFamilies.includes('Inter'));
 });
 
-test('extractCssEvidence preserves raw observations without assigning brand roles', () => {
+test('extractCssEvidence preserves resolved colors without assigning brand roles', () => {
   const css = `
     :root { --primary: #112233; --accent: rgb(244, 122, 97); }
     @font-face { font-family: "Camp Display"; src: url(display.woff2); }
@@ -46,4 +46,15 @@ test('extractCssEvidence preserves raw observations without assigning brand role
   assert.ok(result.fontFamilies.includes('Inter'));
   assert.ok(result.fontFamilies.includes('Camp Display'));
   assert.equal(Object.hasOwn(result, 'primaryColor'), false);
+});
+
+test('extractCssEvidence rejects unresolved and malformed color functions', () => {
+  const css = `
+    .a { color: rgb(var(--color-foreground)); }
+    .b { color: rgb(var(--color-background) / 0.8); }
+    .c { color: rgb(255, 79, 79); }
+    .d { color: rgb(255, 79; }
+  `;
+  const result = extractCssEvidence(css, 'https://example.com/theme.css');
+  assert.deepEqual(result.colors, ['rgb(255, 79, 79)']);
 });
