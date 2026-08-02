@@ -12,13 +12,12 @@ async function fetchText(url, { timeoutMs = DEFAULT_TIMEOUT_MS } = {}) {
       signal: controller.signal,
       headers: { 'user-agent': USER_AGENT, accept: 'text/html,text/css;q=0.9,*/*;q=0.1' }
     });
-    const text = await response.text();
     return {
       ok: response.ok,
       status: response.status,
       finalUrl: response.url || url,
       contentType: response.headers.get('content-type') ?? '',
-      text
+      text: await response.text()
     };
   } finally {
     clearTimeout(timer);
@@ -40,33 +39,33 @@ function evidenceRecord(id, subjectPath, summary, sourceType, locator, method) {
   };
 }
 
+function inventoryItem({ id, sourceId, type, location, status, httpStatus, mediaType, title, notes, error }) {
+  return Object.fromEntries(Object.entries({ id, sourceId, type, location, status, httpStatus, mediaType, title, notes, error }).filter(([, value]) => value !== undefined));
+}
+
 export async function inspectUrl(request) {
   if (!request?.sourceUrl) throw new Error('sourceUrl is required');
   if (!['owner-provided', 'owner-authorized', 'public-reference'].includes(request.authorization)) {
     throw new Error('authorization must be owner-provided, owner-authorized, or public-reference');
   }
 
-  const startedAt = now();
-  const pageResult = await fetchText(request.sourceUrl);
-  const pages = [];
-  const assets = [];
-  const failures = [];
+  const capturedAt = now();
+  const items = [];
   const evidence = [];
-
-  if (!pageResult.ok) {
-    failures.push({ location: request.sourceUrl, stage: 'page-fetch', status: pageResult.status, message: 'Homepage could not be fetched successfully.' });
-  }
-
+  const pageResult = await fetchText(request.sourceUrl);
   const html = extractHtmlEvidence(pageResult.text, pageResult.finalUrl);
-  pages.push({
+
+  items.push(inventoryItem({
     id: 'page.home',
+    sourceId: request.primarySourceId ?? 'source.website',
+    type: 'page',
     location: pageResult.finalUrl,
-    pageType: 'homepage',
     status: pageResult.ok ? 'inspected' : 'failed',
     httpStatus: pageResult.status,
+    mediaType: pageResult.contentType,
     title: html.page.title,
-    capturedAt: now()
-  });
+    error: pageResult.ok ? undefined : 'Homepage could not be fetched successfully.'
+  }));
 
   evidence.push(evidenceRecord('ev.page.title', '/observations/page/title', `Observed page title: ${html.page.title || '(empty)'}`, 'website', pageResult.finalUrl, 'HTML title extraction'));
   if (html.page.description) evidence.push(evidenceRecord('ev.page.description', '/observations/page/description', 'Observed meta description.', 'website', pageResult.finalUrl, 'HTML meta extraction'));
@@ -74,23 +73,52 @@ export async function inspectUrl(request) {
 
   for (const [index, logo] of html.likelyLogos.entries()) {
     const id = `asset.logo.${index + 1}`;
-    assets.push({ id, type: 'logo-candidate', location: logo.src, status: 'referenced', context: { alt: logo.alt, className: logo.className, elementId: logo.id } });
+    items.push(inventoryItem({
+      id,
+      sourceId: request.primarySourceId ?? 'source.website',
+      type: 'logo',
+      location: logo.src,
+      status: 'discovered-not-inspected',
+      notes: [`alt=${logo.alt || '(empty)'}`, `class=${logo.className || '(empty)'}`, `elementId=${logo.id || '(empty)'}`]
+    }));
     evidence.push(evidenceRecord(`ev.logo.${index + 1}`, `/observations/assets/${id}`, `Observed likely logo candidate ${logo.src}.`, 'asset', logo.src, 'Filename, alt text, class, or id matched logo/wordmark/brand'));
   }
 
   for (const [index, icon] of html.icons.entries()) {
-    assets.push({ id: `asset.icon.${index + 1}`, type: 'icon', location: icon, status: 'referenced' });
+    items.push(inventoryItem({
+      id: `asset.icon.${index + 1}`,
+      sourceId: request.primarySourceId ?? 'source.website',
+      type: 'image',
+      location: icon,
+      status: 'discovered-not-inspected',
+      notes: ['Referenced by an icon link relation.']
+    }));
   }
 
   const cssObservations = [html.inlineCss];
   for (const [index, stylesheetUrl] of html.stylesheets.entries()) {
     try {
       const cssResult = await fetchText(stylesheetUrl);
-      assets.push({ id: `asset.stylesheet.${index + 1}`, type: 'stylesheet', location: cssResult.finalUrl, status: cssResult.ok ? 'inspected' : 'failed', httpStatus: cssResult.status });
+      items.push(inventoryItem({
+        id: `asset.stylesheet.${index + 1}`,
+        sourceId: request.primarySourceId ?? 'source.website',
+        type: 'stylesheet',
+        location: cssResult.finalUrl,
+        status: cssResult.ok ? 'inspected' : 'failed',
+        httpStatus: cssResult.status,
+        mediaType: cssResult.contentType,
+        error: cssResult.ok ? undefined : 'Stylesheet could not be fetched successfully.'
+      }));
       if (cssResult.ok) cssObservations.push(extractCssEvidence(cssResult.text, cssResult.finalUrl));
-      else failures.push({ location: stylesheetUrl, stage: 'stylesheet-fetch', status: cssResult.status, message: 'Stylesheet could not be fetched successfully.' });
     } catch (error) {
-      failures.push({ location: stylesheetUrl, stage: 'stylesheet-fetch', message: error.message });
+      items.push(inventoryItem({
+        id: `asset.stylesheet.${index + 1}`,
+        sourceId: request.primarySourceId ?? 'source.website',
+        type: 'stylesheet',
+        location: stylesheetUrl,
+        status: 'failed',
+        error: error.message
+      }));
     }
   }
 
@@ -122,11 +150,8 @@ export async function inspectUrl(request) {
     sourceInventory: {
       schemaVersion: '0.1.0',
       requestId: request.requestId,
-      startedAt,
-      completedAt: now(),
-      pages,
-      assets,
-      failures
+      capturedAt,
+      items
     },
     observations: {
       page: html.page,
