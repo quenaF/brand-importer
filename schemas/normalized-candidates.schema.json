@@ -4,7 +4,7 @@
   "title": "Normalized Brand Candidates",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schemaVersion", "requestId", "status", "generatedAt", "colors", "typography", "assets", "unknowns"],
+  "required": ["schemaVersion", "requestId", "status", "generatedAt", "colors", "typography", "assets", "imagery", "unknowns"],
   "properties": {
     "schemaVersion": { "const": "0.1.0" },
     "requestId": { "type": "string", "minLength": 1 },
@@ -13,6 +13,7 @@
     "colors": { "type": "array", "items": { "$ref": "#/$defs/colorCandidate" } },
     "typography": { "type": "array", "items": { "$ref": "#/$defs/fontCandidate" } },
     "assets": { "type": "array", "items": { "$ref": "#/$defs/assetCandidate" } },
+    "imagery": { "type": "array", "items": { "$ref": "#/$defs/imageryCandidate" } },
     "unknowns": { "type": "array", "items": { "$ref": "#/$defs/unknown" } },
     "summary": {
       "type": "object",
@@ -22,12 +23,14 @@
         "normalizedColorCount": { "type": "integer", "minimum": 0 },
         "rawFontCount": { "type": "integer", "minimum": 0 },
         "normalizedFontCount": { "type": "integer", "minimum": 0 },
-        "logoCandidateCount": { "type": "integer", "minimum": 0 }
+        "logoCandidateCount": { "type": "integer", "minimum": 0 },
+        "rawImageCount": { "type": "integer", "minimum": 0 },
+        "imageryCandidateCount": { "type": "integer", "minimum": 0 }
       }
     }
   },
   "$defs": {
-    "baseCandidate": {
+    "candidateCore": {
       "type": "object",
       "required": ["id", "score", "status", "requiresOwnerReview", "evidenceIds", "rationale"],
       "properties": {
@@ -40,26 +43,21 @@
       }
     },
     "colorCandidate": {
-      "allOf": [
-        { "$ref": "#/$defs/baseCandidate" },
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "required": ["id", "value", "candidateRoles", "score", "status", "requiresOwnerReview", "evidenceIds", "rationale", "occurrences"],
-          "properties": {
-            "id": { "type": "string" },
-            "value": { "type": "string" },
-            "candidateRoles": { "type": "array", "items": { "enum": ["primary", "secondary", "accent", "surface", "background", "text", "border", "semantic", "unknown"] }, "minItems": 1, "uniqueItems": true },
-            "score": { "type": "number", "minimum": 0, "maximum": 1 },
-            "status": { "const": "derived" },
-            "requiresOwnerReview": { "const": true },
-            "evidenceIds": { "type": "array", "items": { "type": "string" }, "minItems": 1, "uniqueItems": true },
-            "rationale": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
-            "occurrences": { "type": "integer", "minimum": 1 },
-            "sources": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
-          }
-        }
-      ]
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "value", "candidateRoles", "score", "status", "requiresOwnerReview", "evidenceIds", "rationale", "occurrences"],
+      "properties": {
+        "id": { "type": "string" },
+        "value": { "type": "string" },
+        "candidateRoles": { "type": "array", "items": { "enum": ["primary", "secondary", "accent", "surface", "background", "text", "border", "semantic", "unknown"] }, "minItems": 1, "uniqueItems": true },
+        "score": { "type": "number", "minimum": 0, "maximum": 1 },
+        "status": { "const": "derived" },
+        "requiresOwnerReview": { "const": true },
+        "evidenceIds": { "type": "array", "items": { "type": "string" }, "minItems": 1, "uniqueItems": true },
+        "rationale": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "occurrences": { "type": "integer", "minimum": 1 },
+        "sources": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+      }
     },
     "fontCandidate": {
       "type": "object",
@@ -92,6 +90,29 @@
         "evidenceIds": { "type": "array", "items": { "type": "string" }, "minItems": 1, "uniqueItems": true },
         "rationale": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
         "alt": { "type": "string" }
+      }
+    },
+    "imageryCandidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "location", "candidateRoles", "score", "status", "requiresOwnerReview", "evidenceIds", "rationale", "orientation", "peopleLikely", "rightsStatus", "safeguards"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[A-Za-z0-9._:-]+$" },
+        "location": { "type": "string", "minLength": 1 },
+        "candidateRoles": { "type": "array", "items": { "enum": ["hero", "section-banner", "experience-card", "product-card", "brand-atmosphere", "content-support", "background-texture", "unknown"] }, "minItems": 1, "uniqueItems": true },
+        "score": { "type": "number", "minimum": 0, "maximum": 1 },
+        "status": { "const": "derived" },
+        "requiresOwnerReview": { "const": true },
+        "evidenceIds": { "type": "array", "items": { "type": "string" }, "minItems": 1, "uniqueItems": true },
+        "rationale": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "alt": { "type": "string" },
+        "parentRegion": { "type": "string" },
+        "width": { "type": ["integer", "null"], "minimum": 1 },
+        "height": { "type": ["integer", "null"], "minimum": 1 },
+        "orientation": { "enum": ["landscape", "portrait", "square", "unknown"] },
+        "peopleLikely": { "type": "boolean" },
+        "rightsStatus": { "enum": ["owner-approved", "owner-authorized-source", "unknown", "restricted"] },
+        "safeguards": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
       }
     },
     "unknown": {
