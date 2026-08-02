@@ -1,7 +1,6 @@
 import * as cheerio from 'cheerio';
 
 const HEX = /#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\b/g;
-const RGB = /rgba?\([^)]*\)/g;
 const CSS_VAR = /--([a-zA-Z0-9-_]+)\s*:\s*([^;}{]+)/g;
 const FONT_FAMILY = /font-family\s*:\s*([^;}{]+)/gi;
 const FONT_FACE = /@font-face\s*{[^}]*font-family\s*:\s*([^;}{]+)/gi;
@@ -28,8 +27,27 @@ function numberOrNull(value) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 }
 
+function extractResolvedRgbFunctions(cssText) {
+  const values = [];
+  const startPattern = /rgba?\(/gi;
+  for (const match of cssText.matchAll(startPattern)) {
+    let depth = 1;
+    let index = match.index + match[0].length;
+    while (index < cssText.length && depth > 0) {
+      if (cssText[index] === '(') depth += 1;
+      else if (cssText[index] === ')') depth -= 1;
+      index += 1;
+    }
+    if (depth !== 0) continue;
+    const value = cssText.slice(match.index, index).trim();
+    if (/var\(/i.test(value)) continue;
+    if (/^rgba?\(\s*[\d.]+\s*,\s*[\d.]+\s*,\s*[\d.]+(?:\s*,\s*[\d.]+)?\s*\)$/i.test(value)) values.push(value);
+  }
+  return values;
+}
+
 export function extractCssEvidence(cssText, sourceUrl) {
-  const colors = uniq([...(cssText.match(HEX) ?? []), ...(cssText.match(RGB) ?? [])]);
+  const colors = uniq([...(cssText.match(HEX) ?? []), ...extractResolvedRgbFunctions(cssText)]);
   const variables = [];
   for (const match of cssText.matchAll(CSS_VAR)) variables.push({ name: `--${match[1]}`, value: match[2].trim() });
   const fontFamilies = [];
