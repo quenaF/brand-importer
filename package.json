@@ -5,11 +5,13 @@
   "type": "module",
   "description": "Evidence-backed brand importer skill and Brand Pack contracts.",
   "scripts": {
+    "import": "node scripts/import.mjs",
     "validate": "node scripts/validate.mjs",
     "test": "node --test tests/*.test.mjs"
   },
   "dependencies": {
     "ajv": "^8.17.1",
-    "ajv-formats": "^3.0.1"
+    "ajv-formats": "^3.0.1",
+    "cheerio": "^1.0.0"
   }
 }
