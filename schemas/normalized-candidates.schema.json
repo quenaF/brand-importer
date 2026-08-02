@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://brand-importer.dev/schemas/normalized-candidates.schema.json",
+  "title": "Normalized Brand Candidates",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "requestId", "status", "generatedAt", "colors", "typography", "assets", "unknowns"],
+  "properties": {
+    "schemaVersion": { "const": "0.1.0" },
+    "requestId": { "type": "string", "minLength": 1 },
+    "status": { "const": "provisional" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "colors": { "type": "array", "items": { "$ref": "#/$defs/colorCandidate" } },
+    "typography": { "type": "array", "items": { "$ref": "#/$defs/fontCandidate" } },
+    "assets": { "type": "array", "items": { "$ref": "#/$defs/assetCandidate" } },
+    "unknowns": { "type": "array", "items": { "$ref": "#/$defs/unknown" } },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "rawColorCount": { "type": "integer", "minimum": 0 },
+        "normalizedColorCount": { "type": "integer", "minimum": 0 },
+        "rawFontCount": { "type": "integer", "minimum": 0 },
+        "normalizedFontCount": { "type": "integer", "minimum": 0 },
+        "logoCandidateCount": { "type": "integer", "minimum": 0 }
+      }
+    }
+  },
+  "$defs": {
+    "baseCandidate": {
+      "type": "object",
+      "required": ["id", "score", "status", "requiresOwnerReview", "evidenceIds", "rationale"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[A-Za-z0-9._:-]+$" },
+        "score": { "type": "number", "minimum": 0, "maximum": 1 },
+        "status": { "const": "derived" },
+        "requiresOwnerReview": { "const": true },
+        "evidenceIds": { "type": "array", "items": { "type": "string" }, "minItems": 1, "uniqueItems": true },
+        "rationale": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+      }
+    },
+    "colorCandidate": {
+      "allOf": [
+        { "$ref": "#/$defs/baseCandidate" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "value", "candidateRoles", "score", "status", "requiresOwnerReview", "evidenceIds", "rationale", "occurrences"],
+          "properties": {
+            "id": { "type": "string" },
+            "value": { "type": "string" },
+            "candidateRoles": { "type": "array", "items": { "enum": ["primary", "secondary", "accent", "surface", "background", "text", "border", "semantic", "unknown"] }, "minItems": 1, "uniqueItems": true },
+            "score": { "type": "number", "minimum": 0, "maximum": 1 },
+            "status": { "const": "derived" },
+            "requiresOwnerReview": { "const": true },
+            "evidenceIds": { "type": "array", "items": { "type": "string" }, "minItems": 1, "uniqueItems": true },
+            "rationale": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+            "occurrences": { "type": "integer", "minimum": 1 },
+            "sources": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+          }
+        }
+      ]
+    },
+    "fontCandidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "family", "candidateRoles", "score", "status", "requiresOwnerReview", "evidenceIds", "rationale", "occurrences"],
+      "properties": {
+        "id": { "type": "string" },
+        "family": { "type": "string", "minLength": 1 },
+        "candidateRoles": { "type": "array", "items": { "enum": ["display", "heading", "body", "navigation", "label", "fallback", "icon", "unknown"] }, "minItems": 1, "uniqueItems": true },
+        "score": { "type": "number", "minimum": 0, "maximum": 1 },
+        "status": { "const": "derived" },
+        "requiresOwnerReview": { "const": true },
+        "evidenceIds": { "type": "array", "items": { "type": "string" }, "minItems": 1, "uniqueItems": true },
+        "rationale": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "occurrences": { "type": "integer", "minimum": 1 },
+        "excludedFromBrandTypography": { "type": "boolean" }
+      }
+    },
+    "assetCandidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "location", "candidateRoles", "score", "status", "requiresOwnerReview", "evidenceIds", "rationale"],
+      "properties": {
+        "id": { "type": "string" },
+        "location": { "type": "string", "minLength": 1 },
+        "candidateRoles": { "type": "array", "items": { "enum": ["primary-logo", "secondary-logo", "wordmark", "mark", "unknown"] }, "minItems": 1, "uniqueItems": true },
+        "score": { "type": "number", "minimum": 0, "maximum": 1 },
+        "status": { "const": "derived" },
+        "requiresOwnerReview": { "const": true },
+        "evidenceIds": { "type": "array", "items": { "type": "string" }, "minItems": 1, "uniqueItems": true },
+        "rationale": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "alt": { "type": "string" }
+      }
+    },
+    "unknown": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "question", "impact"],
+      "properties": {
+        "id": { "type": "string" },
+        "question": { "type": "string", "minLength": 1 },
+        "impact": { "enum": ["blocking", "material", "minor"] },
+        "recommendedAction": { "type": "string" }
+      }
+    }
+  }
+}
