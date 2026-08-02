@@ -37,7 +37,17 @@
       "type": "array",
       "minItems": 1,
       "uniqueItems": true,
-      "items": { "enum": ["brand-pack", "css", "tailwind", "report"] }
+      "items": {
+        "enum": [
+          "source-inventory",
+          "observations",
+          "evidence",
+          "report",
+          "brand-pack",
+          "css",
+          "tailwind"
+        ]
+      }
     },
     "ownerContext": {
       "type": "object",
