@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "0.1.0",
+  "requestId": "req.harborlight.001",
+  "sources": [{
+    "id": "src.manual",
+    "type": "manual-input",
+    "location": "examples/01-synthetic-camp/source-notes.md",
+    "note": "Fictional owner-provided source notes."
+  }],
+  "authorization": {
+    "status": "owner-provided",
+    "assertedBy": "fixture-author",
+    "note": "Synthetic example only."
+  },
+  "requestedOutputs": ["brand-pack", "css", "tailwind", "report"],
+  "ownerContext": {
+    "productType": "youth camp operations platform",
+    "audiences": ["parents", "camp staff", "program owners"],
+    "knownConstraints": ["Safety language must remain direct and specific."],
+    "ownerNotes": ["The brand should feel adventurous without weakening trust signals."]
+  },
+  "createdAt": "2026-07-31T15:40:00Z"
+}
