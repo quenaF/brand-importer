@@ -1,6 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+import Ajv2020 from 'ajv/dist/2020.js';
+import addFormats from 'ajv-formats';
 import { inspectUrl } from '../src/inspect.mjs';
 
 function readJson(filePath) {
@@ -9,6 +11,20 @@ function readJson(filePath) {
 
 function writeJson(filePath, value) {
   fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`, 'utf8');
+}
+
+function validateRequest(request) {
+  const schemaPath = path.resolve(process.cwd(), 'schemas/import-request.schema.json');
+  const schema = readJson(schemaPath);
+  const ajv = new Ajv2020({ allErrors: true, strict: false });
+  addFormats(ajv);
+  const validate = ajv.compile(schema);
+  if (validate(request)) return;
+
+  const details = (validate.errors ?? [])
+    .map((error) => `${error.instancePath || '/'} ${error.message}`)
+    .join('; ');
+  throw new Error(`Import request does not match the canonical schema: ${details}`);
 }
 
 async function main() {
@@ -21,6 +37,8 @@ async function main() {
 
   const absoluteRequestPath = path.resolve(process.cwd(), requestPath);
   const request = readJson(absoluteRequestPath);
+  validateRequest(request);
+
   const outputDir = path.resolve(process.cwd(), outputDirArg ?? `imports/${request.requestId}`);
   fs.mkdirSync(outputDir, { recursive: true });
 
