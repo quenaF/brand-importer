@@ -1,16 +1,38 @@
 {
   "name": "brand-importer",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "type": "module",
-  "description": "Evidence-backed brand importer skill and Brand Pack contracts.",
+  "description": "Evidence-backed, ephemeral brand importer for AI-assisted white-label product development.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "exports": {
+    ".": "./src/api.mjs",
+    "./runtime-compiler": "./src/runtime/compile.mjs",
+    "./imagery-review-plan": "./src/imagery/review-plan.mjs",
+    "./schemas/*": "./schemas/*"
+  },
+  "files": [
+    "src",
+    "schemas",
+    "skills",
+    "docs",
+    "templates",
+    "examples",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "import": "node scripts/import.mjs",
     "normalize": "node scripts/normalize.mjs",
     "generate:experience-dna": "node scripts/generate-experience-dna.mjs",
     "generate:provisional": "node scripts/generate-provisional.mjs",
     "validate": "node scripts/validate.mjs",
-    "test": "node --test tests/*.test.mjs"
+    "test": "node --test tests/*.test.mjs",
+    "test:contracts": "node --test tests/extension-contracts.test.mjs tests/release-gate.test.mjs",
+    "release:check": "npm test && npm run validate && npm pack --dry-run"
   },
   "dependencies": {
     "ajv": "^8.17.1",
