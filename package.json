@@ -12,6 +12,7 @@
     ".": "./src/api.mjs",
     "./runtime-compiler": "./src/runtime/compile.mjs",
     "./imagery-review-plan": "./src/imagery/review-plan.mjs",
+    "./compatibility": "./src/contracts/compatibility.mjs",
     "./schemas/*": "./schemas/*"
   },
   "files": [
