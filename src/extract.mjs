@@ -57,6 +57,34 @@ export function extractCssEvidence(cssText, sourceUrl) {
   return { sourceUrl, colors, variables, fontFamilies: uniq(fontFamilies) };
 }
 
+function imageFromNode($, node, index, pageUrl) {
+  const parent = node.closest('header,main,section,article,footer,nav').first();
+  const parentTag = parent.length ? parent.get(0)?.tagName?.toLowerCase() : '';
+  const pictureSource = node.closest('picture').find('source').first();
+  const src = absolute(pageUrl,
+    node.attr('src') || node.attr('data-src') || node.attr('data-lazy-src') ||
+    pictureSource.attr('src') || pictureSource.attr('data-src'));
+  const srcset = clean(
+    node.attr('srcset') || node.attr('data-srcset') || node.attr('data-lazy-srcset') ||
+    pictureSource.attr('srcset') || pictureSource.attr('data-srcset'));
+  return {
+    id: `image.${index + 1}`,
+    src,
+    srcset,
+    alt: clean(node.attr('alt')),
+    className: clean(node.attr('class')),
+    elementId: clean(node.attr('id')),
+    width: numberOrNull(node.attr('width')),
+    height: numberOrNull(node.attr('height')),
+    loading: clean(node.attr('loading')),
+    parentRegion: parentTag || 'unknown',
+    link: absolute(pageUrl, node.closest('a').attr('href')),
+    contextText: clean(parent.text()).slice(0, 240),
+    sourcePage: pageUrl,
+    discoveryMethod: pictureSource.length ? 'picture-or-img' : 'img'
+  };
+}
+
 export function extractHtmlEvidence(html, pageUrl) {
   const $ = cheerio.load(html);
   const title = clean($('title').first().text());
@@ -73,36 +101,53 @@ export function extractHtmlEvidence(html, pageUrl) {
     url.hash = '';
     return { url: url.href, text: clean($(el).text()), rel: clean($(el).attr('rel')) };
   }).get().filter(Boolean).map((item) => JSON.stringify(item))).map((item) => JSON.parse(item));
-  const images = $('img').map((index, el) => {
+
+  const images = $('img').map((index, el) => imageFromNode($, $(el), index, pageUrl)).get().filter((item) => item.src);
+
+  const openGraphImages = uniq([
+    ...$('meta[property="og:image"],meta[property="og:image:url"],meta[property="og:image:secure_url"]').map((_, el) => absolute(pageUrl, $(el).attr('content'))).get(),
+    ...$('meta[name="twitter:image"],meta[name="twitter:image:src"]').map((_, el) => absolute(pageUrl, $(el).attr('content'))).get()
+  ]).map((src, index) => ({
+    id: `og-image.${index + 1}`,
+    src,
+    srcset: '',
+    alt: clean($('meta[property="og:image:alt"],meta[name="twitter:image:alt"]').first().attr('content')),
+    className: '',
+    elementId: '',
+    width: numberOrNull($('meta[property="og:image:width"]').first().attr('content')),
+    height: numberOrNull($('meta[property="og:image:height"]').first().attr('content')),
+    loading: '',
+    parentRegion: 'metadata',
+    link: null,
+    contextText: `${title} ${description}`.trim().slice(0, 240),
+    sourcePage: pageUrl,
+    discoveryMethod: 'open-graph'
+  }));
+
+  const inlineSvgCandidates = $('svg').map((index, el) => {
     const node = $(el);
-    const parent = node.closest('header,main,section,article,footer,nav').first();
-    const parentTag = parent.length ? parent.get(0)?.tagName?.toLowerCase() : '';
-    const className = clean(node.attr('class'));
-    const id = clean(node.attr('id'));
-    const alt = clean(node.attr('alt'));
-    const src = absolute(pageUrl, node.attr('src') || node.attr('data-src'));
-    const srcset = clean(node.attr('srcset') || node.attr('data-srcset'));
-    const width = numberOrNull(node.attr('width'));
-    const height = numberOrNull(node.attr('height'));
-    const link = absolute(pageUrl, node.closest('a').attr('href'));
-    const contextText = clean(parent.text()).slice(0, 240);
+    const parent = node.closest('header,nav,footer').first();
+    const label = clean(node.attr('aria-label') || node.find('title').first().text());
+    const marker = `${node.attr('id') ?? ''} ${node.attr('class') ?? ''} ${label} ${parent.attr('class') ?? ''}`;
+    if (!/logo|wordmark|brand/i.test(marker)) return null;
     return {
-      id: `image.${index + 1}`,
-      src,
-      srcset,
-      alt,
-      className,
-      elementId: id,
-      width,
-      height,
-      loading: clean(node.attr('loading')),
-      parentRegion: parentTag || 'unknown',
-      link,
-      contextText,
-      sourcePage: pageUrl
+      id: `inline-svg-logo.${index + 1}`,
+      src: `${pageUrl}#${clean(node.attr('id')) || `inline-svg-logo-${index + 1}`}`,
+      alt: label,
+      className: clean(node.attr('class')),
+      elementId: clean(node.attr('id')),
+      width: numberOrNull(node.attr('width')),
+      height: numberOrNull(node.attr('height')),
+      parentRegion: parent.length ? parent.get(0)?.tagName?.toLowerCase() : 'unknown',
+      contextText: clean(parent.text()).slice(0, 240),
+      sourcePage: pageUrl,
+      discoveryMethod: 'inline-svg',
+      inlineSvg: true
     };
-  }).get().filter((item) => item.src);
-  const likelyLogos = images.filter((item) => /logo|wordmark|brand/i.test(`${item.src} ${item.alt} ${item.className} ${item.elementId}`));
+  }).get().filter(Boolean);
+
+  const allImages = [...images, ...openGraphImages];
+  const likelyLogos = [...allImages.filter((item) => /logo|wordmark|brand/i.test(`${item.src} ${item.alt} ${item.className} ${item.elementId}`)), ...inlineSvgCandidates];
   const inlineCss = uniq([
     ...$('style').map((_, el) => $(el).html() ?? '').get(),
     ...$('[style]').map((_, el) => $(el).attr('style') ?? '').get()
@@ -116,7 +161,8 @@ export function extractHtmlEvidence(html, pageUrl) {
     stylesheets,
     icons,
     internalLinks,
-    images,
+    images: allImages,
+    openGraphImages,
     likelyLogos,
     inlineCss: extractCssEvidence(inlineCss, `${pageUrl}#inline-styles`),
     themeColor: themeColor || null,
