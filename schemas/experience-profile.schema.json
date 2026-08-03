@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://brand-importer.dev/schemas/experience-profile.schema.json",
+  "title": "Brand Importer Experience Profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["profileVersion", "id", "domain", "primaryAudience", "previewTargets", "brandInfluence", "protectedDomainTruth", "imageryIntent", "status"],
+  "properties": {
+    "profileVersion": { "const": "1.0.0" },
+    "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "domain": { "type": "string", "minLength": 1 },
+    "primaryAudience": { "type": "string", "minLength": 1 },
+    "secondaryAudiences": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "previewTargets": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "coreWorkflows": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "sensitiveContexts": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "brandInfluence": { "type": "array", "minItems": 1, "items": { "enum": ["colors", "typography", "logos", "approved-imagery", "voice-guidance", "experience-dna", "visual-rhythm", "welcome-language", "motion-guidance"] }, "uniqueItems": true },
+    "protectedDomainTruth": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "imageryIntent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["prioritize", "deprioritize", "requiredCoverage", "safety"],
+      "properties": {
+        "prioritize": { "type": "array", "items": { "$ref": "#/$defs/imageCategory" }, "uniqueItems": true },
+        "deprioritize": { "type": "array", "items": { "$ref": "#/$defs/imageCategory" }, "uniqueItems": true },
+        "requiredCoverage": { "type": "array", "items": { "$ref": "#/$defs/imageCategory" }, "uniqueItems": true },
+        "maxReviewCandidates": { "type": "integer", "minimum": 1, "maximum": 50, "default": 12 },
+        "safety": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["identifiablePeopleRequireApproval", "minorsRequireExplicitApproval"],
+          "properties": {
+            "identifiablePeopleRequireApproval": { "type": "boolean" },
+            "minorsRequireExplicitApproval": { "type": "boolean" },
+            "excludePeopleByDefault": { "type": "boolean", "default": false }
+          }
+        }
+      }
+    },
+    "status": { "enum": ["proposed", "developer-confirmed"] },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "method": { "enum": ["developer-authored", "agent-proposed", "template-derived"] },
+        "confirmedBy": { "type": "string" },
+        "confirmedAt": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "$defs": {
+    "imageCategory": {
+      "enum": ["people", "participants", "staff", "team", "activity", "instructional", "program-representation", "community", "event", "environment", "location", "facility", "product", "storefront-product", "editorial", "campaign", "illustration", "texture", "brand-atmosphere"]
+    }
+  }
+}
