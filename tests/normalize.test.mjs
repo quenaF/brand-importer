@@ -32,12 +32,12 @@ test('unresolved font variables are excluded from candidates and surfaced',()=>{
  assert.match(result.unknowns.find(item=>item.id==='unknown.font-variables').recommendedAction,/--font-heading-family/);
 });
 
-test('imagery normalization ranks useful images and protects people and rights',()=>{
+test('imagery normalization ranks useful images and protects people, rights, and page provenance',()=>{
  const observations={
   likelyLogos:[{src:'https://example.com/logo.png'}],
   images:[
-   {src:'https://example.com/logo.png',alt:'Example logo',parentRegion:'header',width:400,height:120,contextText:''},
-   {src:'https://example.com/surf-camp-family.jpg',alt:'Family and children at surf camp',parentRegion:'section',width:1600,height:900,contextText:'Surf camp community'}
+   {src:'https://example.com/logo.png',alt:'Example logo',parentRegion:'header',width:400,height:120,contextText:'',sourcePage:'https://example.com/'},
+   {src:'https://example.com/surf-camp-family.jpg',alt:'Family and children at surf camp',parentRegion:'section',width:1600,height:900,contextText:'Surf camp community',sourcePage:'https://example.com/camps'}
   ]
  };
  const evidence={records:[{id:'ev.image.2',sources:[{locator:'https://example.com/surf-camp-family.jpg'}]}]};
@@ -45,6 +45,7 @@ test('imagery normalization ranks useful images and protects people and rights',
  assert.equal(imagery.length,1);
  assert.ok(imagery[0].candidateRoles.includes('hero'));
  assert.ok(imagery[0].candidateRoles.includes('brand-atmosphere'));
+ assert.deepEqual(imagery[0].sourcePages,['https://example.com/camps']);
  assert.equal(imagery[0].peopleLikely,true);
  assert.equal(imagery[0].rightsStatus,'unknown');
  assert.equal(imagery[0].requiresOwnerReview,true);
