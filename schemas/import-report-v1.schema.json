@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://brand-importer.dev/schemas/import-report-v1.schema.json",
+  "title": "Brand Import Receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["reportVersion", "sessionId", "requestId", "status", "source", "startedAt", "completedAt", "counts", "observed", "inferred", "review", "warnings", "exports", "disposal"],
+  "properties": {
+    "reportVersion": { "const": "1.0.0" },
+    "sessionId": { "type": "string", "minLength": 1 },
+    "requestId": { "type": "string", "minLength": 1 },
+    "status": { "enum": ["awaiting-review", "accepted", "exported", "failed", "cancelled", "disposed"] },
+    "source": { "type": "object", "additionalProperties": false, "required": ["url", "authorization"], "properties": { "url": { "type": "string", "format": "uri" }, "authorization": { "type": "string", "minLength": 1 } } },
+    "startedAt": { "type": "string", "format": "date-time" },
+    "completedAt": { "type": "string", "format": "date-time" },
+    "durationMs": { "type": "integer", "minimum": 0 },
+    "counts": { "type": "object", "additionalProperties": { "type": "integer", "minimum": 0 } },
+    "observed": { "type": "array", "items": { "type": "string" } },
+    "inferred": { "type": "array", "items": { "type": "string" } },
+    "review": { "type": "object", "additionalProperties": false, "required": ["required", "blockingItems", "materialItems"], "properties": { "required": { "type": "boolean" }, "blockingItems": { "type": "integer", "minimum": 0 }, "materialItems": { "type": "integer", "minimum": 0 } } },
+    "warnings": { "type": "array", "items": { "type": "string" } },
+    "exports": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "disposal": { "type": "object", "additionalProperties": false, "required": ["required", "completed"], "properties": { "required": { "const": true }, "completed": { "type": "boolean" }, "disposedAt": { "type": ["string", "null"], "format": "date-time" } } }
+  }
+}
