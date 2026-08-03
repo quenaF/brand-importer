@@ -111,7 +111,7 @@ export function normalizeImagery(observations, evidence) {
       )).toFixed(3));
       const safeguards = ['Owner approval required before reuse outside the source website.'];
       if (peopleLikely) safeguards.push('Confirm consent and appropriate reuse rights for identifiable people.');
-      if (minorsLikely) safeguards.push('Explicit approval is required before any likely-minor imagery can be used.');
+      if (minorsLikely) safeguards.push('Explicit approval is required before imagery likely to include minors can be used.');
       if (!image.alt) safeguards.push('Create contextual alt text before application use.');
       if (!image.width || !image.height) safeguards.push('Verify intrinsic dimensions and crop suitability before prominent placement.');
       const sourcePages = uniq([image.sourcePage, image.pageUrl]);
