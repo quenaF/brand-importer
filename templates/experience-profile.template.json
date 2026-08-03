@@ -1,0 +1,34 @@
+{
+  "profileVersion": "1.0.0",
+  "id": "replace-with-profile-id",
+  "domain": "replace-with-domain",
+  "primaryAudience": "replace-with-primary-audience",
+  "secondaryAudiences": [],
+  "previewTargets": ["replace-with-preview-target"],
+  "coreWorkflows": [],
+  "sensitiveContexts": [],
+  "brandInfluence": [
+    "colors",
+    "typography",
+    "logos",
+    "approved-imagery",
+    "voice-guidance",
+    "experience-dna"
+  ],
+  "protectedDomainTruth": [],
+  "imageryIntent": {
+    "prioritize": ["program-representation", "environment", "community"],
+    "deprioritize": ["storefront-product"],
+    "requiredCoverage": [],
+    "maxReviewCandidates": 12,
+    "safety": {
+      "identifiablePeopleRequireApproval": true,
+      "minorsRequireExplicitApproval": true,
+      "excludePeopleByDefault": false
+    }
+  },
+  "status": "proposed",
+  "provenance": {
+    "method": "agent-proposed"
+  }
+}
