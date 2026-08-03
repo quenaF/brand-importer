@@ -20,9 +20,9 @@ export function normalizeImport({ request, observations, evidence }) {
     recommendedAction: `Resolve these references from inspected CSS variables or owner guidance: ${[...new Set(unresolvedFontReferences)].join(', ')}`
   });
   if (assets.length === 0) unknowns.push({ id: 'unknown.logo', question: 'Which logo asset is approved for application use?', impact: 'material', recommendedAction: 'Provide an approved logo file or inspect additional authorized pages.' });
-  if (imagery.length === 0) unknowns.push({ id: 'unknown.imagery', question: 'Which site imagery is approved and suitable for reuse in the white-label product?', impact: 'material', recommendedAction: 'Inspect additional authorized pages or provide an approved image library.' });
+  if (imagery.filter((item) => !item.utility).length === 0) unknowns.push({ id: 'unknown.imagery', question: 'Which site imagery is approved and suitable for reuse in the white-label product?', impact: 'material', recommendedAction: 'Inspect additional authorized pages or provide an approved image library.' });
   return {
-    schemaVersion: '0.1.0',
+    schemaVersion: '1.0.0',
     requestId: request.requestId,
     status: 'provisional',
     generatedAt: new Date().toISOString(),
@@ -38,7 +38,7 @@ export function normalizeImport({ request, observations, evidence }) {
       normalizedFontCount: typography.length,
       logoCandidateCount: assets.length,
       rawImageCount: observations?.images?.length ?? 0,
-      imageryCandidateCount: imagery.length
+      imageryCandidateCount: imagery.filter((item) => !item.utility).length
     }
   };
 }
