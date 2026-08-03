@@ -55,11 +55,11 @@ export function resolveWebsiteSource(request) {
   let url;
   try { url = new URL(source.location); } catch { throw new Error(`Website source '${source.id}' must contain a valid absolute URL.`); }
   if (!['http:', 'https:'].includes(url.protocol)) throw new Error(`Website source '${source.id}' must use http or https.`);
-  return { source, sourceUrl: url.toString() };
+  return { source, sourceUrl: url.toString(), authorizationStatus };
 }
 
 export async function inspectUrl(request) {
-  const { source, sourceUrl } = resolveWebsiteSource(request);
+  const { source, sourceUrl, authorizationStatus } = resolveWebsiteSource(request);
   const firstResult = await fetchText(sourceUrl);
   const firstHtml = extractHtmlEvidence(firstResult.text, firstResult.finalUrl);
   const crawlUrls = selectCrawlUrls(firstResult.finalUrl, firstHtml.internalLinks);
@@ -137,7 +137,7 @@ export async function inspectUrl(request) {
 
   return {
     sourceInventory: { schemaVersion: '0.1.0', requestId: request.requestId, capturedAt: now(), items },
-    observations: { page: pages[0], pages, crawl: { strategy: 'same-origin-keyword', maxPages: MAX_PAGES, inspectedUrls: pages.map((page) => page.url) }, colors, fonts, cssVariables: Object.fromEntries(variableMap), images: [...imageMap.values()], likelyLogos: [...logoMap.values()], icons: [...iconUrls], headings, callsToAction: [...callsToAction], navigation: [...navigation] },
+    observations: { authorizationStatus, page: pages[0], pages, crawl: { strategy: 'same-origin-keyword', maxPages: MAX_PAGES, inspectedUrls: pages.map((page) => page.url) }, colors, fonts, cssVariables: Object.fromEntries(variableMap), images: [...imageMap.values()], likelyLogos: [...logoMap.values()], icons: [...iconUrls], headings, callsToAction: [...callsToAction], navigation: [...navigation] },
     evidence: { schemaVersion: '0.1.0', generatedAt: now(), records: evidence }
   };
 }
