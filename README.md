@@ -1,16 +1,22 @@
 # Brand Importer
 
-**A reusable developer skill and headless library for turning authorized brand sources into a portable, evidence-backed runtime identity for white-label software.**
+## **Observe a brand. Export an identity. Leave nothing behind.**
 
-Brand Importer is a session-based AI component that observes an organization's authorized public identity, produces portable brand artifacts, and disconnects—leaving ownership of the resulting brand package entirely with the developer.
+Brand Importer is a **session-based developer toolkit** that transforms authorized brand sources into **portable, evidence-backed runtime identity** for AI-assisted and white-label software.
 
-It helps developers and AI coding agents understand an organization's public brand expression without hard-coding a demo tenant or confusing brand identity with the kind of product being built.
+```text
+Connect → Observe → Propose → Review → Export → Dispose
+```
+
+Every observation remains traceable to its source. Every inference is explicitly labeled. Every exported artifact belongs to the developer—not the importer. When the session ends, Brand Importer disconnects and retains no organizational memory.
 
 > Ephemeral intelligence. Portable ownership. Clean disconnection.
 
-## What it does
+## Why Brand Importer exists
 
-Given an authorized website or supplied brand materials, Brand Importer can:
+Most white-label systems begin with a logo upload, a few colors, and a theme editor. Brand Importer begins with **understanding**.
+
+Given an authorized website or supplied brand materials, it can:
 
 - inventory pages, stylesheets, assets, and source limitations;
 - discover logos, Open Graph images, inline SVG marks, colors, typography, imagery, language, and interface signals;
@@ -25,14 +31,45 @@ Given an authorized website or supplied brand materials, Brand Importer can:
 - emit truthful progress events for host UIs;
 - export an import receipt and dispose the session without retaining organizational memory.
 
-## What it does not do
+Nothing is silently published. Consequential decisions remain reviewable, correctable, and attributable.
 
-Brand Importer does not decide whether the host product is a youth camp, marketplace, patient portal, store, or another experience. It does not own tenant data, operational workflows, a runtime registry, deployment, or long-term brand memory.
+## Designed for AI-native software
 
-The host project supplies:
+Brand Importer is not tied to one framework, tenant, industry, or product type.
+
+```text
+Brand Importer
+      ↓
+runtime-brand.json
+      +
+Experience Profile
+      +
+Domain Adapter
+      ↓
+Host Application
+```
+
+The importer understands the organization. The host project defines the experience being built.
+
+Brand Importer does **not** decide whether the host product is a youth camp, marketplace, patient portal, store, or another experience. It does not own tenant data, operational workflows, a runtime registry, deployment, or long-term brand memory.
+
+The host project may supply:
 
 - `experience-profile.json` — the product domain, audience, workflows, preview targets, imagery intent, and protected domain truth;
 - a Domain Adapter — the project-specific mapping from runtime brand into tokens, components, and a reversible preview.
+
+These are extension contracts, not importer-core assumptions.
+
+## Core principles
+
+- **Evidence before inference**
+- **Human review before adoption**
+- **Portable artifacts over hidden state**
+- **Ephemeral sessions instead of permanent memory**
+- **Versioned contracts over implicit behavior**
+- **Developer ownership of exported outputs**
+- **No example tenant or previous brand as fallback**
+- **Rights-aware imagery handling**
 
 ## Architecture
 
@@ -116,12 +153,27 @@ Every consequential conclusion uses the most specific status available:
 
 Frequency is not treated as importance. Inference is not presented as owner-approved truth.
 
+## Host-agent integration
+
+AI coding agents and host applications should begin with [HOST_AGENT.md](HOST_AGENT.md). It defines:
+
+- project discovery rules;
+- Experience Profile creation and confirmation;
+- Domain Adapter responsibilities;
+- compatibility negotiation;
+- review and rights boundaries;
+- preview isolation tests;
+- export and disposal behavior.
+
+Agent ecosystems can also install the published skill at [`skills/import-brand/SKILL.md`](skills/import-brand/SKILL.md).
+
 ## Documentation
 
+- [Host Agent Guide](HOST_AGENT.md)
 - [Architecture](docs/architecture.md)
 - [Philosophy](docs/philosophy.md)
 - [Headless API](docs/api.md)
-- [Host Agent Integration](docs/host-agent-integration.md)
+- [Host Agent Integration Protocol](docs/host-agent-integration.md)
 - [Extension Kits](docs/extension-kits.md)
 - [Examples](docs/examples.md)
 - [Security and Privacy](docs/security.md)
@@ -135,8 +187,6 @@ npm test
 npm run validate
 npm run release:check
 ```
-
-Before a package-registry release, generate and commit `package-lock.json` so CI can return to `npm ci` with reproducible dependency resolution.
 
 ## Contributing
 
