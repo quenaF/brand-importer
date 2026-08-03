@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://brand-importer.dev/schemas/owner-decisions.schema.json",
-  "title": "Brand Importer Owner Decisions",
+  "title": "Session-Bound Brand Owner Decisions",
   "type": "object",
   "additionalProperties": false,
-  "required": ["decisionVersion", "organizationId", "sourceImportId", "status", "decidedAt", "decidedBy", "decisions"],
+  "required": ["decisionVersion", "sessionId", "sourceImportId", "status", "decidedAt", "decidedBy", "decisions", "retention"],
   "properties": {
     "decisionVersion": { "const": "1.0.0" },
-    "organizationId": { "type": "string", "minLength": 1 },
+    "sessionId": { "type": "string", "minLength": 1 },
     "sourceImportId": { "type": "string", "minLength": 1 },
     "status": { "enum": ["in-progress", "confirmed", "confirmed-with-corrections"] },
     "decidedAt": { "type": "string", "format": "date-time" },
@@ -21,24 +21,16 @@
         "contact": { "type": "string" }
       }
     },
-    "decisions": {
-      "type": "array",
-      "items": { "$ref": "#/$defs/decision" },
-      "uniqueItems": true
-    },
-    "invalidations": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["decisionId", "reason", "detectedAt"],
-        "properties": {
-          "decisionId": { "type": "string" },
-          "reason": { "enum": ["source-changed", "candidate-removed", "material-content-change", "manual-reset"] },
-          "detectedAt": { "type": "string", "format": "date-time" }
-        }
+    "retention": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scope", "persistedByImporter"],
+      "properties": {
+        "scope": { "const": "current-session-and-export-bundle" },
+        "persistedByImporter": { "const": false }
       }
-    }
+    },
+    "decisions": { "type": "array", "items": { "$ref": "#/$defs/decision" }, "uniqueItems": true }
   },
   "$defs": {
     "decision": {
@@ -47,15 +39,20 @@
       "required": ["id", "subjectType", "subjectId", "action", "sourceFingerprint", "recordedAt"],
       "properties": {
         "id": { "type": "string", "pattern": "^[A-Za-z0-9._:-]+$" },
-        "subjectType": { "enum": ["color", "typography", "logo", "imagery", "experience-dna", "voice", "unknown"] },
+        "subjectType": { "enum": ["color", "typography", "logo", "imagery", "experience-signals", "voice", "unknown"] },
         "subjectId": { "type": "string", "minLength": 1 },
         "action": { "enum": ["confirm", "correct", "approve", "reject", "hold", "deprioritize", "leave-unresolved"] },
         "correctedValue": {},
         "approvedRoles": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "rightsConfirmation": { "enum": ["not-applicable", "confirmed", "not-confirmed", "restricted"] },
         "notes": { "type": "string" },
         "sourceFingerprint": { "type": "string", "minLength": 1 },
         "recordedAt": { "type": "string", "format": "date-time" }
-      }
+      },
+      "allOf": [
+        { "if": { "properties": { "action": { "const": "correct" } } }, "then": { "required": ["correctedValue"] } },
+        { "if": { "properties": { "subjectType": { "const": "imagery" }, "action": { "const": "approve" } } }, "then": { "required": ["rightsConfirmation"] } }
+      ]
     }
   }
 }
