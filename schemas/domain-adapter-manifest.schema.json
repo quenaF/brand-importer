@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://brand-importer.dev/schemas/domain-adapter-manifest.schema.json",
+  "title": "Brand Importer Domain Adapter Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["adapterVersion", "id", "accepts", "capabilities", "previewTargets", "protectedSemantics", "fallbackPolicy"],
+  "properties": {
+    "adapterVersion": { "const": "1.0.0" },
+    "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "description": { "type": "string" },
+    "accepts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["runtimeBrand", "experienceProfile"],
+      "properties": {
+        "runtimeBrand": { "type": "string", "pattern": "^[~^]?[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "experienceProfile": { "type": "string", "pattern": "^[~^]?[0-9]+\\.[0-9]+\\.[0-9]+$" }
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "enum": ["colors", "typography", "logos", "approved-imagery", "voice-guidance", "experience-dna", "visual-rhythm", "motion-guidance"] }
+    },
+    "previewTargets": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "protectedSemantics": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "mapping": {
+      "type": "object",
+      "additionalProperties": { "type": "string", "minLength": 1 }
+    },
+    "unsupportedCapabilities": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "fallbackPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["missingBrandValue", "missingImagery", "invalidArtifact", "exampleTenantFallback"],
+      "properties": {
+        "missingBrandValue": { "enum": ["retain-host-default", "use-neutral-token", "block-preview"] },
+        "missingImagery": { "enum": ["omit", "use-neutral-placeholder", "block-preview"] },
+        "invalidArtifact": { "enum": ["reject", "use-last-valid", "use-neutral"] },
+        "exampleTenantFallback": { "const": "forbidden" }
+      }
+    },
+    "implementation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "entrypoint": { "type": "string", "minLength": 1 },
+        "applyPreview": { "type": "string", "minLength": 1 },
+        "revertPreview": { "type": "string", "minLength": 1 },
+        "compatibilityCheck": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}
