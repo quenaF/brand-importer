@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://brand-importer.dev/schemas/imagery-review-plan.schema.json",
+  "title": "Profile-Aware Imagery Review Plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["planVersion", "experienceProfileId", "generatedAt", "candidates", "summary"],
+  "properties": {
+    "planVersion": { "const": "1.0.0" },
+    "experienceProfileId": { "type": "string", "minLength": 1 },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "location", "categories", "experienceRelevance", "reviewScore", "selectionStatus", "safetyReasons", "bulkApprovalAllowed"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "location": { "type": "string", "minLength": 1 },
+          "categories": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/imageCategory" } },
+          "experienceRelevance": { "type": "number", "minimum": 0, "maximum": 1 },
+          "reviewScore": { "type": "number", "minimum": 0, "maximum": 1 },
+          "selectionStatus": { "enum": ["recommended", "supporting", "excluded"] },
+          "safetyReasons": { "type": "array", "items": { "type": "string" } },
+          "bulkApprovalAllowed": { "type": "boolean" },
+          "people": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["presentLikely", "minorsLikely", "identifiableLikely"],
+            "properties": {
+              "presentLikely": { "type": "boolean" },
+              "minorsLikely": { "type": "boolean" },
+              "identifiableLikely": { "type": "boolean" }
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["catalogCount", "reviewCandidateCount", "missingCoverage", "peopleCandidates", "likelyMinorCandidates", "productCandidates"],
+      "properties": {
+        "catalogCount": { "type": "integer", "minimum": 0 },
+        "reviewCandidateCount": { "type": "integer", "minimum": 0 },
+        "missingCoverage": { "type": "array", "items": { "$ref": "#/$defs/imageCategory" }, "uniqueItems": true },
+        "peopleCandidates": { "type": "integer", "minimum": 0 },
+        "likelyMinorCandidates": { "type": "integer", "minimum": 0 },
+        "productCandidates": { "type": "integer", "minimum": 0 }
+      }
+    }
+  },
+  "$defs": {
+    "imageCategory": {
+      "enum": ["people", "participants", "staff", "team", "activity", "instructional", "program-representation", "community", "event", "environment", "location", "facility", "product", "storefront-product", "editorial", "campaign", "illustration", "texture", "brand-atmosphere"]
+    }
+  }
+}
