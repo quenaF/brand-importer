@@ -1,0 +1,13 @@
+node_modules/
+*.tgz
+
+# Environment
+.env
+.env.*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+npm-debug.log*
