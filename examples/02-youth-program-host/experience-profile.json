@@ -1,0 +1,29 @@
+{
+  "profileVersion": "1.0.0",
+  "id": "youth-program-parent-preview",
+  "domain": "youth-program",
+  "primaryAudience": "parent",
+  "secondaryAudiences": ["guardian"],
+  "previewTargets": ["parent-home"],
+  "coreWorkflows": ["arrival", "daily-plan", "activity-updates", "pickup-readiness", "authorized-release"],
+  "sensitiveContexts": ["minors", "location", "health-information", "pickup-authorization"],
+  "brandInfluence": ["colors", "typography", "logos", "approved-imagery", "voice-guidance", "experience-dna"],
+  "protectedDomainTruth": ["safety-status", "custody-language", "emergency-alerts", "authorization-records"],
+  "imageryIntent": {
+    "prioritize": ["program-representation", "instructional", "people", "staff", "environment", "community"],
+    "deprioritize": ["storefront-product"],
+    "requiredCoverage": ["program-representation", "staff", "environment"],
+    "maxReviewCandidates": 12,
+    "safety": {
+      "identifiablePeopleRequireApproval": true,
+      "minorsRequireExplicitApproval": true,
+      "excludePeopleByDefault": false
+    }
+  },
+  "status": "developer-confirmed",
+  "provenance": {
+    "method": "developer-authored",
+    "confirmedBy": "example developer",
+    "confirmedAt": "2026-08-03T12:00:00.000Z"
+  }
+}
