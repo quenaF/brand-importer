@@ -8,4 +8,4 @@ This branch verifies the public `import-brand` Agent Skill package.
 - [x] Host-agent guidance is packaged inside the skill
 - [x] Replit install instructions target `.agents/skills`
 - [x] Repository-native package tests are included
-- [ ] Complete CI release gate passes
+- [x] Complete CI release gate passes — GitHub Actions run #67
