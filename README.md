@@ -1,86 +1,145 @@
 # Brand Importer
 
-**An open developer skill for turning a company’s public brand identity into a portable, implementation-ready Brand Pack.**
+**A reusable developer skill and headless library for turning authorized brand sources into a portable, evidence-backed runtime identity for white-label software.**
 
-Brand Importer helps developers and AI coding agents create white-label products without starting from a blank theme or loosely copying a website. It collects brand evidence, separates observation from inference, invites owner correction where needed, and produces structured outputs that can be reused across applications and frameworks.
+Brand Importer helps developers and AI coding agents understand an organization's public brand expression without hard-coding a demo tenant or confusing brand identity with the kind of product being built.
 
-> Do not merely copy what a brand looks like. Preserve what the brand is trying to help people recognize, trust, and experience.
+> Ephemeral intelligence. Portable ownership. Clean disconnection.
 
 ## What it does
 
-Given a company website or supplied brand materials, Brand Importer can:
+Given an authorized website or supplied brand materials, Brand Importer can:
 
-- discover public logos, colors, typography, imagery, interface patterns, and recurring language;
-- distinguish observed evidence, derived values, inferences, owner-confirmed decisions, corrections, and unknowns;
-- identify a provisional brand promise, voice qualities, vocabulary, and emotional intent without presenting interpretation as fact;
-- create a portable Brand Pack for use in white-label applications;
-- generate implementation-ready CSS variables, design tokens, and framework adapters;
-- preserve provenance so developers and brand owners can understand why each decision was made;
-- identify missing or ambiguous brand decisions that require human review.
+- inventory pages, stylesheets, assets, and source limitations;
+- discover logos, Open Graph images, inline SVG marks, colors, typography, imagery, language, and interface signals;
+- rank primary-logo, alternate, wordmark, and mark candidates;
+- deduplicate responsive image variants and filter utility noise;
+- classify imagery as product, program, activity, people, staff, community, environment, instructional, campaign, editorial, and related categories;
+- score quality, brand representativeness, hero suitability, activity relevance, and diversity independently;
+- preserve evidence and distinguish observation, derivation, inference, owner confirmation, correction, and unknowns;
+- generate provisional experience signals rather than presenting interpretation as immutable truth;
+- create a profile-aware imagery review plan when a developer-confirmed Experience Profile is supplied;
+- compile an application-facing `runtime-brand.json` containing only accepted or safely provisional identity;
+- emit truthful progress events for host UIs;
+- export an import receipt and dispose the session without retaining organizational memory.
 
-## Initial inputs
+## What it does not do
 
-Version 0.1 is designed around:
+Brand Importer does not decide whether the host product is a youth camp, marketplace, patient portal, store, or another experience. It does not own tenant data, operational workflows, a runtime registry, deployment, or long-term brand memory.
 
-- a public website URL;
-- optional logos and image assets;
-- optional brand guidelines;
-- optional existing CSS, tokens, or Tailwind configuration;
-- optional owner corrections and overrides.
+The host project supplies:
 
-## Initial outputs
+- `experience-profile.json` — the product domain, audience, workflows, preview targets, imagery intent, and protected domain truth;
+- a Domain Adapter — the project-specific mapping from runtime brand into tokens, components, and a reversible preview.
+
+## Architecture
 
 ```text
-brand-pack/
-├── brand-profile.json
-├── design-tokens.json
-├── voice-and-language.md
-├── asset-manifest.json
-├── evidence.json
-├── theme.css
-├── tailwind.preset.ts
-└── BRAND.md
+Authorized brand sources
+        ↓
+Evidence-backed Brand Importer
+        ↓
+runtime-brand.json
+        +
+experience-profile.json
+        +
+Domain Adapter
+        ↓
+Branded product preview
 ```
 
-The exact export set may vary by environment. The canonical output is the structured Brand Pack, not any single framework adapter.
+Examples are never active defaults. A previous organization or test tenant may not be used as fallback identity or content.
+
+## Headless API
+
+```js
+import { runBrandImport } from 'brand-importer';
+
+const session = await runBrandImport(request, {
+  experienceProfile,
+  ownerDecisions,
+  onProgress(event) {
+    console.log(event.stage, event.state);
+  }
+});
+
+const runtimeBrand = session.exportRuntimeBrand();
+const auditBundle = session.exportBundle();
+session.dispose();
+```
+
+Use `withBrandImportSession()` when cleanup should be guaranteed automatically.
+
+## Session lifecycle
+
+```text
+created → running → awaiting-review → accepted → exported → disposed
+                         ↘ cancelled / failed → disposed
+```
+
+Owner decisions are preserved during the active session and in the user-controlled export bundle. Brand Importer itself does not remember them after disposal. A future import begins fresh.
+
+## Published contracts
+
+Version 0.1 publishes `1.0.0` contracts for:
+
+- runtime brand;
+- Experience Profile;
+- Domain Adapter manifest;
+- owner decisions;
+- imagery review plan;
+- import progress events;
+- import report;
+- ephemeral import session.
+
+Breaking contract changes require a new major contract version. Adapters declare accepted semantic-version ranges and must reject incompatible major versions.
+
+## Imagery intelligence
+
+The importer preserves the complete imagery catalog while preventing product volume from overwhelming experience-relevant content. A youth-program profile can prioritize program, instruction, staff, participants, environment, and community while deprioritizing storefront products. An ecommerce profile can reuse the same catalog and rank product imagery appropriately.
+
+Recommendation never equals approval. Identifiable people and imagery likely to include minors require explicit review and cannot be bulk-approved. Only approved imagery enters `runtime-brand.json`.
 
 ## Evidence discipline
 
-Every consequential brand conclusion should carry the most specific applicable status:
+Every consequential conclusion uses the most specific status available:
 
-- **Observed—live:** directly witnessed on the public website or supplied running experience.
-- **Observed—source:** directly supported by an uploaded brand guide, source file, stylesheet, token file, or asset.
-- **Derived:** mechanically calculated from observed evidence, such as a color conversion or contrast ratio.
-- **Inferred:** a plausible interpretation that requires validation.
-- **Owner confirmed:** explicitly accepted by an authorized brand representative.
-- **Owner corrected:** explicitly changed by an authorized brand representative.
-- **Unknown:** material information is missing or conflicting.
+- **Observed—live**
+- **Observed—source**
+- **Derived**
+- **Inferred**
+- **Owner confirmed**
+- **Owner corrected**
+- **Unknown**
 
-Brand Importer must not silently convert an inference into a brand rule.
+Frequency is not treated as importance. Inference is not presented as owner-approved truth.
+
+## Documentation
+
+- [Architecture](docs/architecture.md)
+- [Philosophy](docs/philosophy.md)
+- [Headless API](docs/api.md)
+- [Host Agent Integration](docs/host-agent-integration.md)
+- [Extension Kits](docs/extension-kits.md)
+- [Examples](docs/examples.md)
+- [Security and Privacy](docs/security.md)
+- [Asset Rights](docs/rights.md)
+
+## Development
+
+```bash
+npm install
+npm test
+npm run validate
+npm run release:check
+```
+
+Before the public release, generate and commit `package-lock.json` so CI can return to `npm ci` with reproducible dependency resolution.
 
 ## LumynQ relationship
 
-Brand Importer is being designed using the public **Build with LumynQ** skill. LumynQ informs its evidence handling, owner-verification experience, uncertainty behavior, trust boundaries, and human-centered workflow.
-
-Brand Importer remains independently usable. A real LumynQ runtime integration must not be claimed unless one is actually implemented against documented public interfaces.
-
-## Repository structure
-
-```text
-.
-├── skills/
-│   └── import-brand/
-│       ├── references/
-│       └── SKILL.md
-├── schemas/
-├── examples/
-├── docs/
-├── LICENSE
-└── README.md
-```
+Brand Importer was designed using the public Build with LumynQ discipline for evidence, uncertainty, owner correction, trust boundaries, and human-centered integration. It remains independently usable and does not claim a proprietary LumynQ runtime integration.
 
 ## Status
 
-**Pre-release / v0.1 design phase.**
-
-The current goal is to establish the skill contract, canonical Brand Pack schema, evidence model, owner-review workflow, and a small set of complete examples before publishing the first release.
+**v0.1 release candidate engineering complete; ready for standalone testing and cross-domain validation.**
