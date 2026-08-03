@@ -33,6 +33,30 @@ Given an authorized website or supplied brand materials, it can:
 
 Nothing is silently published. Consequential decisions remain reviewable, correctable, and attributable.
 
+## Install as a Replit Agent skill
+
+Brand Importer follows the open Agent Skills specification and can be installed directly into a Replit project:
+
+```bash
+npx skills add quenaF/brand-importer --skill import-brand -a replit
+```
+
+For a non-interactive install:
+
+```bash
+npx skills add quenaF/brand-importer --skill import-brand -a replit -y
+```
+
+Replit installs the skill under:
+
+```text
+.agents/skills/import-brand/
+```
+
+The installed package is self-contained and includes the host-agent and Replit usage references. See [`skills/import-brand/references/REPLIT.md`](skills/import-brand/references/REPLIT.md) for usage, update, and removal instructions.
+
+Installing the skill teaches Replit Agent the workflow and safety boundaries. The executable importer library remains a separate host dependency when a project needs live extraction, schemas, progress events, and runtime compilation. Replit supports persistent project skills in `/.agents/skills`, and the open `skills` CLI supports the `replit` agent target. 
+
 ## Designed for AI-native software
 
 Brand Importer is not tied to one framework, tenant, industry, or product type.
@@ -165,11 +189,12 @@ AI coding agents and host applications should begin with [HOST_AGENT.md](HOST_AG
 - preview isolation tests;
 - export and disposal behavior.
 
-Agent ecosystems can also install the published skill at [`skills/import-brand/SKILL.md`](skills/import-brand/SKILL.md).
+Agent ecosystems can install the published skill at [`skills/import-brand/SKILL.md`](skills/import-brand/SKILL.md).
 
 ## Documentation
 
 - [Host Agent Guide](HOST_AGENT.md)
+- [Replit Skill Guide](skills/import-brand/references/REPLIT.md)
 - [Architecture](docs/architecture.md)
 - [Philosophy](docs/philosophy.md)
 - [Headless API](docs/api.md)
