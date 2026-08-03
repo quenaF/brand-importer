@@ -4,7 +4,7 @@
   "private": false,
   "type": "module",
   "description": "Evidence-backed, ephemeral brand importer for AI-assisted white-label product development.",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "engines": {
     "node": ">=22"
   },
@@ -23,7 +23,8 @@
     "templates",
     "examples",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "NOTICE"
   ],
   "scripts": {
     "import": "node scripts/import.mjs",
