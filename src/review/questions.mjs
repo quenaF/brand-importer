@@ -10,9 +10,19 @@ function evidenceIds(items) {
   return uniq(items.flatMap((item) => item.evidenceIds ?? []));
 }
 
-export function generateOwnerReviewSession({ request, normalized }) {
+function dnaHypotheses(experienceDna) {
+  return [
+    ...Object.values(experienceDna?.dimensions ?? {}).flat(),
+    ...(experienceDna?.tensions ?? [])
+  ];
+}
+
+export function generateOwnerReviewSession({ request, normalized, experienceDna }) {
   if (!request?.requestId || normalized?.requestId !== request.requestId) {
     throw new Error('Matching canonical request and normalized candidates are required.');
+  }
+  if (experienceDna && experienceDna.requestId !== request.requestId) {
+    throw new Error('Experience DNA must match the canonical request.');
   }
 
   const questions = [];
@@ -22,12 +32,9 @@ export function generateOwnerReviewSession({ request, normalized }) {
   const imagery = top(normalized.imagery, 8);
 
   questions.push({
-    id: 'review.color.roles',
-    category: 'color',
-    prompt: 'Which colors should define primary actions, accents, surfaces, and text?',
-    impact: 'material',
-    candidateIds: colors.map((item) => item.id),
-    evidenceIds: evidenceIds(colors),
+    id: 'review.color.roles', category: 'color',
+    prompt: 'Which colors should define primary actions, accents, surfaces, and text?', impact: 'material',
+    candidateIds: colors.map((item) => item.id), evidenceIds: evidenceIds(colors),
     allowedActions: ['confirm', 'correct', 'deprioritize', 'mark-unknown', 'add-context'],
     whyItMatters: 'Color roles determine hierarchy, accessibility testing, and how the white-label product communicates action and trust.',
     suggestedAnswer: colors.map((item) => ({ id: item.id, value: item.value, suggestedRoles: item.candidateRoles, score: item.score })),
@@ -35,12 +42,9 @@ export function generateOwnerReviewSession({ request, normalized }) {
   });
 
   questions.push({
-    id: 'review.typography.roles',
-    category: 'typography',
-    prompt: 'Which font families are approved for headings, body copy, navigation, and labels?',
-    impact: 'material',
-    candidateIds: fonts.map((item) => item.id),
-    evidenceIds: evidenceIds(fonts),
+    id: 'review.typography.roles', category: 'typography',
+    prompt: 'Which font families are approved for headings, body copy, navigation, and labels?', impact: 'material',
+    candidateIds: fonts.map((item) => item.id), evidenceIds: evidenceIds(fonts),
     allowedActions: ['confirm', 'correct', 'replace', 'deprioritize', 'mark-unknown'],
     whyItMatters: 'Typography affects recognition, readability, performance, and licensing requirements.',
     suggestedAnswer: fonts.map((item) => ({ id: item.id, family: item.family, suggestedRoles: item.candidateRoles, score: item.score })),
@@ -48,76 +52,75 @@ export function generateOwnerReviewSession({ request, normalized }) {
   });
 
   questions.push({
-    id: 'review.logo.default',
-    category: 'logo',
-    prompt: 'Which logo is the default application logo, and when should alternates be used?',
-    impact: 'material',
-    candidateIds: logos.map((item) => item.id),
-    evidenceIds: evidenceIds(logos),
+    id: 'review.logo.default', category: 'logo',
+    prompt: 'Which logo is the default application logo, and when should alternates be used?', impact: 'material',
+    candidateIds: logos.map((item) => item.id), evidenceIds: evidenceIds(logos),
     allowedActions: ['confirm', 'correct', 'replace', 'deprioritize', 'mark-unknown'],
     whyItMatters: 'A default and approved alternates prevent inconsistent or misleading brand representation.',
     suggestedAnswer: logos.map((item) => ({ id: item.id, location: item.location, suggestedRoles: item.candidateRoles, score: item.score }))
   });
 
   questions.push({
-    id: 'review.imagery.rights',
-    category: 'rights',
-    prompt: 'Which site images may be reused in the white-label product?',
-    impact: 'blocking',
-    candidateIds: imagery.map((item) => item.id),
-    evidenceIds: evidenceIds(imagery),
+    id: 'review.imagery.rights', category: 'rights',
+    prompt: 'Which site images may be reused in the white-label product?', impact: 'blocking',
+    candidateIds: imagery.map((item) => item.id), evidenceIds: evidenceIds(imagery),
     allowedActions: ['confirm', 'correct', 'replace', 'deprioritize', 'mark-unknown', 'add-context'],
     whyItMatters: 'Public visibility does not prove reuse rights, consent, or suitability for a new product context.',
-    suggestedAnswer: imagery.map((item) => ({ id: item.id, location: item.location, proposedRoles: item.candidateRoles, rightsStatus: item.rightsStatus })),
+    suggestedAnswer: imagery.map((item) => ({ id: item.id, location: item.location, proposedRoles: item.candidateRoles, rightsStatus: item.rightsStatus, sourcePages: item.sourcePages ?? [] })),
     notes: ['Confirm people and minor consent before approving identifiable-person imagery.']
   });
 
   questions.push({
-    id: 'review.imagery.roles',
-    category: 'imagery',
-    prompt: 'Which approved images best represent programs, atmosphere, products, and supporting content?',
-    impact: 'material',
-    candidateIds: imagery.map((item) => item.id),
-    evidenceIds: evidenceIds(imagery),
+    id: 'review.imagery.roles', category: 'imagery',
+    prompt: 'Which approved images best represent programs, atmosphere, products, and supporting content?', impact: 'material',
+    candidateIds: imagery.map((item) => item.id), evidenceIds: evidenceIds(imagery),
     allowedActions: ['confirm', 'correct', 'deprioritize', 'mark-unknown', 'add-context'],
     whyItMatters: 'Strategic placement should reinforce the organization rather than decorate unrelated screens.',
-    suggestedAnswer: imagery.map((item) => ({ id: item.id, proposedRoles: item.candidateRoles, orientation: item.orientation, score: item.score }))
+    suggestedAnswer: imagery.map((item) => ({ id: item.id, proposedRoles: item.candidateRoles, orientation: item.orientation, score: item.score, sourcePages: item.sourcePages ?? [] }))
   });
 
   questions.push({
-    id: 'review.experience.intent',
-    category: 'experience',
-    prompt: 'Should the product primarily express surf performance, coastal lifestyle, youth learning, community, or a deliberate blend?',
-    impact: 'material',
+    id: 'review.experience.intent', category: 'experience',
+    prompt: 'Should the product primarily express surf performance, coastal lifestyle, youth learning, community, or a deliberate blend?', impact: 'material',
     candidateIds: [],
-    evidenceIds: uniq([
-      ...(normalized.imagery ?? []).slice(0, 12).flatMap((item) => item.evidenceIds ?? []),
-      ...(normalized.assets ?? []).flatMap((item) => item.evidenceIds ?? [])
-    ]),
+    evidenceIds: uniq([...(normalized.imagery ?? []).slice(0, 12).flatMap((item) => item.evidenceIds ?? []), ...(normalized.assets ?? []).flatMap((item) => item.evidenceIds ?? [])]),
     allowedActions: ['confirm', 'correct', 'mark-unknown', 'add-context'],
     whyItMatters: 'The intended experience controls which observed storefront signals should carry into a youth experience platform.',
     suggestedAnswer: ['surf performance', 'coastal lifestyle', 'youth learning', 'community', 'deliberate blend']
   });
 
-  for (const unknown of normalized.unknowns ?? []) {
+  if (experienceDna) {
+    const hypotheses = dnaHypotheses(experienceDna);
     questions.push({
-      id: `review.${unknown.id}`,
-      category: 'unknown',
-      prompt: unknown.question,
-      impact: unknown.impact,
-      candidateIds: [],
-      evidenceIds: [],
+      id: 'review.experience-dna.hypotheses', category: 'experience',
+      prompt: 'Which Experience DNA hypotheses accurately describe how this product should feel and behave?', impact: 'material',
+      candidateIds: hypotheses.map((item) => item.id), evidenceIds: evidenceIds(hypotheses),
+      allowedActions: ['confirm', 'correct', 'deprioritize', 'mark-unknown', 'add-context'],
+      whyItMatters: 'Experience DNA influences generated layouts, interaction patterns, imagery choices, and language; incorrect hypotheses would spread across every white-label surface.',
+      suggestedAnswer: hypotheses.map((item) => ({ id: item.id, value: item.value, confidence: item.confidence, sourcePages: item.sourcePages, status: item.status })),
+      notes: ['Confidence measures signal coverage, not truth. Confirm each hypothesis independently.']
+    });
+    if ((experienceDna.tensions ?? []).length) {
+      questions.push({
+        id: 'review.experience-dna.tensions', category: 'experience',
+        prompt: 'How should the product resolve the identified brand tensions?', impact: 'material',
+        candidateIds: experienceDna.tensions.map((item) => item.id), evidenceIds: evidenceIds(experienceDna.tensions),
+        allowedActions: ['confirm', 'correct', 'deprioritize', 'mark-unknown', 'add-context'],
+        whyItMatters: 'Tensions identify where faithfully copying the website could conflict with safety, accessibility, consent, or the intended product context.',
+        suggestedAnswer: experienceDna.tensions.map((item) => ({ id: item.id, value: item.value, confidence: item.confidence, sourcePages: item.sourcePages }))
+      });
+    }
+  }
+
+  for (const unknown of [...(normalized.unknowns ?? []), ...(experienceDna?.unknowns ?? [])]) {
+    questions.push({
+      id: `review.${unknown.id}`, category: 'unknown', prompt: unknown.question, impact: unknown.impact,
+      candidateIds: [], evidenceIds: [],
       allowedActions: ['correct', 'replace', 'mark-unknown', 'add-context'],
       whyItMatters: unknown.recommendedAction ?? 'Resolving this uncertainty improves the reliability of the generated Brand Pack.',
       notes: unknown.references ?? []
     });
   }
 
-  return {
-    schemaVersion: '0.1.0',
-    requestId: request.requestId,
-    status: 'not-started',
-    generatedAt: new Date().toISOString(),
-    questions
-  };
+  return { schemaVersion: '0.1.0', requestId: request.requestId, status: 'not-started', generatedAt: new Date().toISOString(), questions };
 }
