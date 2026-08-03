@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://brand-importer.dev/schemas/runtime-brand.schema.json",
+  "title": "Portable Runtime Brand",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contractVersion", "status", "organization", "identity", "experienceSignals", "voice", "accessibility", "approval", "blockers", "provenance"],
+  "properties": {
+    "contractVersion": { "const": "1.0.0" },
+    "status": { "enum": ["provisional", "accepted"] },
+    "organization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "website"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "website": { "type": "string", "format": "uri" }
+      }
+    },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["colors", "typography", "logos", "imagery"],
+      "properties": {
+        "colors": { "type": "array", "items": { "type": "object", "required": ["value", "roles", "status"], "properties": { "value": { "type": "string" }, "roles": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }, "status": { "enum": ["provisional", "approved", "corrected"] }, "evidenceIds": { "type": "array", "items": { "type": "string" } } }, "additionalProperties": true } },
+        "typography": { "type": "array", "items": { "type": "object", "required": ["family", "roles", "status"], "properties": { "family": { "type": "string" }, "roles": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }, "status": { "enum": ["provisional", "approved", "corrected"] }, "evidenceIds": { "type": "array", "items": { "type": "string" } } }, "additionalProperties": true } },
+        "logos": { "type": "array", "items": { "type": "object", "required": ["location", "roles", "status"], "properties": { "location": { "type": "string" }, "roles": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }, "status": { "enum": ["provisional", "approved", "rejected", "corrected"] }, "evidenceIds": { "type": "array", "items": { "type": "string" } } }, "additionalProperties": true } },
+        "imagery": { "type": "array", "items": { "type": "object", "required": ["location", "roles", "status", "rightsStatus"], "properties": { "location": { "type": "string" }, "roles": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }, "status": { "enum": ["approved", "held", "rejected"] }, "rightsStatus": { "enum": ["owner-approved", "owner-authorized-source", "unknown", "restricted"] }, "evidenceIds": { "type": "array", "items": { "type": "string" } } }, "additionalProperties": true } }
+      }
+    },
+    "experienceSignals": { "type": "object", "additionalProperties": true },
+    "voice": { "type": "object", "additionalProperties": true },
+    "accessibility": { "type": "object", "additionalProperties": true },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reviewedAt"],
+      "properties": {
+        "status": { "enum": ["not-reviewed", "in-progress", "accepted", "accepted-with-corrections"] },
+        "reviewedAt": { "type": ["string", "null"], "format": "date-time" },
+        "reviewedBy": { "type": ["string", "null"] }
+      }
+    },
+    "blockers": { "type": "array", "items": { "type": "object", "required": ["id", "message", "severity"], "properties": { "id": { "type": "string" }, "message": { "type": "string" }, "severity": { "enum": ["blocking", "material", "minor"] } }, "additionalProperties": true } },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requestId", "generatedAt", "evidenceBacked"],
+      "properties": {
+        "requestId": { "type": "string" },
+        "generatedAt": { "type": "string", "format": "date-time" },
+        "evidenceBacked": { "const": true },
+        "sourceUrl": { "type": "string", "format": "uri" }
+      }
+    }
+  }
+}
