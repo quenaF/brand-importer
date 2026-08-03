@@ -50,9 +50,11 @@ export function normalizeImagery(observations, evidence) {
       if (peopleLikely) safeguards.push('Confirm consent and appropriate reuse rights for identifiable people, especially minors.');
       if (!image.alt) safeguards.push('Create contextual alt text before application use.');
       if (!image.width || !image.height) safeguards.push('Verify intrinsic dimensions and crop suitability before prominent placement.');
+      const sourcePages = [...new Set([image.sourcePage, image.pageUrl].filter(Boolean))];
       return {
         id: `imagery.${String(index + 1).padStart(3, '0')}`,
         location: image.src,
+        sourcePages,
         candidateRoles: candidateRoles(image),
         score,
         status: 'derived',
