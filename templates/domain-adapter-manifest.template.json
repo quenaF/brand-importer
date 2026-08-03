@@ -1,0 +1,33 @@
+{
+  "adapterVersion": "1.0.0",
+  "id": "replace-with-adapter-id",
+  "description": "Maps runtime brand capabilities into the host application experience.",
+  "accepts": {
+    "runtimeBrand": "^1.0.0",
+    "experienceProfile": "^1.0.0"
+  },
+  "capabilities": [
+    "colors",
+    "typography",
+    "logos",
+    "approved-imagery",
+    "voice-guidance",
+    "experience-dna"
+  ],
+  "previewTargets": ["replace-with-preview-target"],
+  "protectedSemantics": [],
+  "mapping": {},
+  "unsupportedCapabilities": [],
+  "fallbackPolicy": {
+    "missingBrandValue": "retain-host-default",
+    "missingImagery": "omit",
+    "invalidArtifact": "reject",
+    "exampleTenantFallback": "forbidden"
+  },
+  "implementation": {
+    "entrypoint": "src/brand-adapter/index.ts",
+    "applyPreview": "applyBrandPreview",
+    "revertPreview": "revertBrandPreview",
+    "compatibilityCheck": "validateBrandCompatibility"
+  }
+}
