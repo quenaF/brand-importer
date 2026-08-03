@@ -1,0 +1,31 @@
+{
+  "adapterVersion": "1.0.0",
+  "id": "youth-program-parent-adapter",
+  "description": "Maps a portable runtime brand into a neutral youth-program parent preview.",
+  "accepts": {
+    "runtimeBrand": "^1.0.0",
+    "experienceProfile": "^1.0.0"
+  },
+  "capabilities": ["colors", "typography", "logos", "approved-imagery", "voice-guidance", "experience-dna"],
+  "previewTargets": ["parent-home"],
+  "protectedSemantics": ["safety", "custody", "emergency", "authorization"],
+  "mapping": {
+    "identity.colors.primary": "tokens.brand.primary",
+    "identity.typography.body": "tokens.font.body",
+    "identity.logos.primary-logo": "components.BrandHeader.logo",
+    "identity.imagery.hero": "components.ParentWelcome.approvedHero"
+  },
+  "unsupportedCapabilities": [],
+  "fallbackPolicy": {
+    "missingBrandValue": "retain-host-default",
+    "missingImagery": "omit",
+    "invalidArtifact": "reject",
+    "exampleTenantFallback": "forbidden"
+  },
+  "implementation": {
+    "entrypoint": "src/brand-adapter/index.ts",
+    "applyPreview": "applyBrandPreview",
+    "revertPreview": "revertBrandPreview",
+    "compatibilityCheck": "validateBrandCompatibility"
+  }
+}
