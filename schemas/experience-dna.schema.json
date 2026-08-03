@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://brand-importer.dev/schemas/experience-dna.schema.json",
+  "title": "Experience DNA",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "requestId", "status", "generatedAt", "dimensions", "tensions", "unknowns", "ownerReview"],
+  "properties": {
+    "schemaVersion": { "const": "0.1.0" },
+    "requestId": { "type": "string", "minLength": 1 },
+    "status": { "const": "inferred" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["environment", "humanEnergy", "interactionStyle", "visualRhythm", "trustSignals"],
+      "properties": {
+        "environment": { "$ref": "#/$defs/hypotheses" },
+        "humanEnergy": { "$ref": "#/$defs/hypotheses" },
+        "interactionStyle": { "$ref": "#/$defs/hypotheses" },
+        "visualRhythm": { "$ref": "#/$defs/hypotheses" },
+        "trustSignals": { "$ref": "#/$defs/hypotheses" }
+      }
+    },
+    "tensions": { "$ref": "#/$defs/hypotheses" },
+    "unknowns": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "question", "impact", "recommendedAction"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[A-Za-z0-9._:-]+$" },
+          "question": { "type": "string", "minLength": 1 },
+          "impact": { "enum": ["blocking", "material", "minor"] },
+          "recommendedAction": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "ownerReview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "required"],
+      "properties": {
+        "status": { "const": "not-started" },
+        "required": { "const": true },
+        "instructions": { "type": "string" }
+      }
+    }
+  },
+  "$defs": {
+    "hypotheses": { "type": "array", "items": { "$ref": "#/$defs/hypothesis" } },
+    "hypothesis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "value", "status", "confidence", "evidenceIds", "sourcePages", "rationale", "requiresOwnerReview"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[A-Za-z0-9._:-]+$" },
+        "value": { "type": "string", "minLength": 1 },
+        "status": { "const": "inferred" },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "evidenceIds": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string" } },
+        "sourcePages": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "format": "uri" } },
+        "rationale": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "counterEvidenceIds": { "type": "array", "uniqueItems": true, "items": { "type": "string" } },
+        "requiresOwnerReview": { "const": true }
+      }
+    }
+  }
+}
