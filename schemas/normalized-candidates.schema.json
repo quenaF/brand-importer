@@ -95,10 +95,11 @@
     "imageryCandidate": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "location", "candidateRoles", "score", "status", "requiresOwnerReview", "evidenceIds", "rationale", "orientation", "peopleLikely", "rightsStatus", "safeguards"],
+      "required": ["id", "location", "sourcePages", "candidateRoles", "score", "status", "requiresOwnerReview", "evidenceIds", "rationale", "orientation", "peopleLikely", "rightsStatus", "safeguards"],
       "properties": {
         "id": { "type": "string", "pattern": "^[A-Za-z0-9._:-]+$" },
         "location": { "type": "string", "minLength": 1 },
+        "sourcePages": { "type": "array", "items": { "type": "string", "format": "uri" }, "minItems": 1, "uniqueItems": true },
         "candidateRoles": { "type": "array", "items": { "enum": ["hero", "section-banner", "experience-card", "product-card", "brand-atmosphere", "content-support", "background-texture", "unknown"] }, "minItems": 1, "uniqueItems": true },
         "score": { "type": "number", "minimum": 0, "maximum": 1 },
         "status": { "const": "derived" },
