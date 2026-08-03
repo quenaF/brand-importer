@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 jobs:
-  validate:
+  release-gate:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -20,7 +20,5 @@ jobs:
           node-version: 22
       - name: Install dependencies
         run: npm install --no-package-lock --ignore-scripts
-      - name: Run deterministic tests
-        run: npm test
-      - name: Validate example bundle contracts
-        run: npm run validate
+      - name: Run complete release gate
+        run: npm run release:check
