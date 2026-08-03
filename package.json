@@ -31,9 +31,10 @@
     "generate:experience-dna": "node scripts/generate-experience-dna.mjs",
     "generate:provisional": "node scripts/generate-provisional.mjs",
     "validate": "node scripts/validate.mjs",
+    "validate:contracts": "node scripts/validate-contracts.mjs",
     "test": "node --test tests/*.test.mjs",
     "test:contracts": "node --test tests/extension-contracts.test.mjs tests/release-gate.test.mjs",
-    "release:check": "npm test && npm run validate && npm pack --dry-run"
+    "release:check": "npm test && npm run validate && npm run validate:contracts && npm pack --dry-run"
   },
   "dependencies": {
     "ajv": "^8.17.1",
