@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://brand-importer.dev/schemas/import-progress-event.schema.json",
+  "title": "Brand Importer Progress Event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["eventVersion", "importId", "sequence", "stage", "state", "occurredAt"],
+  "properties": {
+    "eventVersion": { "const": "1.0.0" },
+    "importId": { "type": "string", "minLength": 1 },
+    "sequence": { "type": "integer", "minimum": 0 },
+    "stage": {
+      "enum": [
+        "source.connecting",
+        "source.connected",
+        "pages.discovering",
+        "pages.inspected",
+        "identity.logos",
+        "identity.colors",
+        "identity.typography",
+        "imagery.catalog",
+        "imagery.review-plan",
+        "experience-dna",
+        "owner-review",
+        "runtime-brand",
+        "import.complete"
+      ]
+    },
+    "state": { "enum": ["queued", "running", "completed", "completed-with-warning", "failed"] },
+    "occurredAt": { "type": "string", "format": "date-time" },
+    "message": { "type": "string" },
+    "counts": {
+      "type": "object",
+      "additionalProperties": { "type": "integer", "minimum": 0 }
+    },
+    "warningCodes": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "message": { "type": "string", "minLength": 1 },
+        "retryable": { "type": "boolean" }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "state": { "const": "failed" } } },
+      "then": { "required": ["error"] }
+    }
+  ]
+}
