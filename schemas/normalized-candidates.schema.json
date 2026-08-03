@@ -30,25 +30,13 @@
     }
   },
   "$defs": {
-    "candidateCore": {
-      "type": "object",
-      "required": ["id", "score", "status", "requiresOwnerReview", "evidenceIds", "rationale"],
-      "properties": {
-        "id": { "type": "string", "pattern": "^[A-Za-z0-9._:-]+$" },
-        "score": { "type": "number", "minimum": 0, "maximum": 1 },
-        "status": { "const": "derived" },
-        "requiresOwnerReview": { "const": true },
-        "evidenceIds": { "type": "array", "items": { "type": "string" }, "minItems": 1, "uniqueItems": true },
-        "rationale": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
-      }
-    },
     "colorCandidate": {
       "type": "object",
       "additionalProperties": false,
       "required": ["id", "value", "candidateRoles", "score", "status", "requiresOwnerReview", "evidenceIds", "rationale", "occurrences"],
       "properties": {
-        "id": { "type": "string" },
-        "value": { "type": "string" },
+        "id": { "type": "string", "pattern": "^[A-Za-z0-9._:-]+$" },
+        "value": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}(?:[0-9a-fA-F]{2})?$" },
         "candidateRoles": { "type": "array", "items": { "enum": ["primary", "secondary", "accent", "surface", "background", "text", "border", "semantic", "unknown"] }, "minItems": 1, "uniqueItems": true },
         "score": { "type": "number", "minimum": 0, "maximum": 1 },
         "status": { "const": "derived" },
@@ -64,7 +52,7 @@
       "additionalProperties": false,
       "required": ["id", "family", "candidateRoles", "score", "status", "requiresOwnerReview", "evidenceIds", "rationale", "occurrences"],
       "properties": {
-        "id": { "type": "string" },
+        "id": { "type": "string", "pattern": "^[A-Za-z0-9._:-]+$" },
         "family": { "type": "string", "minLength": 1 },
         "candidateRoles": { "type": "array", "items": { "enum": ["display", "heading", "body", "navigation", "label", "fallback", "icon", "unknown"] }, "minItems": 1, "uniqueItems": true },
         "score": { "type": "number", "minimum": 0, "maximum": 1 },
@@ -81,7 +69,7 @@
       "additionalProperties": false,
       "required": ["id", "location", "candidateRoles", "score", "status", "requiresOwnerReview", "evidenceIds", "rationale"],
       "properties": {
-        "id": { "type": "string" },
+        "id": { "type": "string", "pattern": "^[A-Za-z0-9._:-]+$" },
         "location": { "type": "string", "minLength": 1 },
         "candidateRoles": { "type": "array", "items": { "enum": ["primary-logo", "secondary-logo", "wordmark", "mark", "unknown"] }, "minItems": 1, "uniqueItems": true },
         "score": { "type": "number", "minimum": 0, "maximum": 1 },
@@ -95,13 +83,20 @@
     "imageryCandidate": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "location", "sourcePages", "candidateRoles", "score", "status", "requiresOwnerReview", "evidenceIds", "rationale", "orientation", "peopleLikely", "rightsStatus", "safeguards"],
+      "required": ["id", "location", "sourcePages", "discoveryMethod", "categories", "candidateRoles", "score", "brandRepresentativeness", "qualitySuitability", "diversityValue", "utility", "status", "requiresOwnerReview", "evidenceIds", "rationale", "orientation", "people", "peopleLikely", "rightsStatus", "selectionStatus", "approvalStatus", "safeguards"],
       "properties": {
         "id": { "type": "string", "pattern": "^[A-Za-z0-9._:-]+$" },
         "location": { "type": "string", "minLength": 1 },
         "sourcePages": { "type": "array", "items": { "type": "string", "format": "uri" }, "minItems": 1, "uniqueItems": true },
+        "discoveryMethod": { "enum": ["img", "picture-or-img", "open-graph", "css-background", "other"] },
+        "categories": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "$ref": "#/$defs/imageCategory" } },
         "candidateRoles": { "type": "array", "items": { "enum": ["hero", "section-banner", "experience-card", "product-card", "brand-atmosphere", "content-support", "background-texture", "unknown"] }, "minItems": 1, "uniqueItems": true },
         "score": { "type": "number", "minimum": 0, "maximum": 1 },
+        "brandRepresentativeness": { "type": "number", "minimum": 0, "maximum": 1 },
+        "qualitySuitability": { "type": "number", "minimum": 0, "maximum": 1 },
+        "diversityValue": { "type": "number", "minimum": 0, "maximum": 1 },
+        "utility": { "type": "boolean" },
+        "utilityReason": { "type": ["string", "null"] },
         "status": { "const": "derived" },
         "requiresOwnerReview": { "const": true },
         "evidenceIds": { "type": "array", "items": { "type": "string" }, "minItems": 1, "uniqueItems": true },
@@ -111,10 +106,25 @@
         "width": { "type": ["integer", "null"], "minimum": 1 },
         "height": { "type": ["integer", "null"], "minimum": 1 },
         "orientation": { "enum": ["landscape", "portrait", "square", "unknown"] },
+        "people": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["presentLikely", "minorsLikely", "identifiableLikely"],
+          "properties": {
+            "presentLikely": { "type": "boolean" },
+            "minorsLikely": { "type": "boolean" },
+            "identifiableLikely": { "type": "boolean" }
+          }
+        },
         "peopleLikely": { "type": "boolean" },
         "rightsStatus": { "enum": ["owner-approved", "owner-authorized-source", "unknown", "restricted"] },
+        "selectionStatus": { "enum": ["recommended", "supporting", "excluded"] },
+        "approvalStatus": { "enum": ["approved", "rejected", "held", "unreviewed"] },
         "safeguards": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
       }
+    },
+    "imageCategory": {
+      "enum": ["people", "participants", "staff", "team", "activity", "instructional", "program-representation", "community", "event", "environment", "location", "facility", "product", "storefront-product", "editorial", "campaign", "illustration", "texture", "brand-atmosphere"]
     },
     "unknown": {
       "type": "object",
@@ -124,7 +134,8 @@
         "id": { "type": "string" },
         "question": { "type": "string", "minLength": 1 },
         "impact": { "enum": ["blocking", "material", "minor"] },
-        "recommendedAction": { "type": "string" }
+        "recommendedAction": { "type": "string" },
+        "references": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
       }
     }
   }
