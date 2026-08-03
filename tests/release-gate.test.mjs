@@ -80,7 +80,7 @@ test('program hero ranks above repeated product imagery for youth-program profil
   assert.equal(plan.candidates[0].bulkApprovalAllowed, false);
 });
 
-test('runtime compiler includes only explicitly approved imagery', () => {
+test('runtime compiler includes only explicitly approved imagery with confirmed rights', () => {
   const request = { requestId: 'runtime-test', sourceUrl: 'https://example.test/' };
   const normalized = {
     colors: [{ id: 'color.1', value: '#112233', candidateRoles: ['primary'], evidenceIds: ['ev.1'] }],
@@ -97,7 +97,7 @@ test('runtime compiler includes only explicitly approved imagery', () => {
     decidedAt: '2026-08-03T12:00:00.000Z',
     decidedBy: { name: 'Owner' },
     decisions: [
-      { subjectId: 'imagery.1', action: 'approve', approvedRoles: ['hero'] },
+      { subjectId: 'imagery.1', action: 'approve', approvedRoles: ['hero'], rightsConfirmation: 'confirmed' },
       { subjectId: 'imagery.2', action: 'hold' }
     ]
   };
