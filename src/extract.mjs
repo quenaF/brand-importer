@@ -64,6 +64,15 @@ export function extractHtmlEvidence(html, pageUrl) {
   const themeColor = clean($('meta[name="theme-color"]').attr('content'));
   const stylesheets = uniq($('link[rel~="stylesheet"]').map((_, el) => absolute(pageUrl, $(el).attr('href'))).get());
   const icons = uniq($('link[rel*="icon"]').map((_, el) => absolute(pageUrl, $(el).attr('href'))).get());
+  const pageOrigin = new URL(pageUrl).origin;
+  const internalLinks = uniq($('a[href]').map((_, el) => {
+    const href = absolute(pageUrl, $(el).attr('href'));
+    if (!href) return null;
+    const url = new URL(href);
+    if (url.origin !== pageOrigin || !['http:', 'https:'].includes(url.protocol)) return null;
+    url.hash = '';
+    return { url: url.href, text: clean($(el).text()), rel: clean($(el).attr('rel')) };
+  }).get().filter(Boolean).map((item) => JSON.stringify(item))).map((item) => JSON.parse(item));
   const images = $('img').map((index, el) => {
     const node = $(el);
     const parent = node.closest('header,main,section,article,footer,nav').first();
@@ -89,7 +98,8 @@ export function extractHtmlEvidence(html, pageUrl) {
       loading: clean(node.attr('loading')),
       parentRegion: parentTag || 'unknown',
       link,
-      contextText
+      contextText,
+      sourcePage: pageUrl
     };
   }).get().filter((item) => item.src);
   const likelyLogos = images.filter((item) => /logo|wordmark|brand/i.test(`${item.src} ${item.alt} ${item.className} ${item.elementId}`));
@@ -97,7 +107,7 @@ export function extractHtmlEvidence(html, pageUrl) {
     ...$('style').map((_, el) => $(el).html() ?? '').get(),
     ...$('[style]').map((_, el) => $(el).attr('style') ?? '').get()
   ]).join('\n');
-  const headings = $('h1,h2,h3').map((_, el) => ({ level: el.tagName.toLowerCase(), text: clean($(el).text()) })).get().filter((item) => item.text);
+  const headings = $('h1,h2,h3').map((_, el) => ({ level: el.tagName.toLowerCase(), text: clean($(el).text()), sourcePage: pageUrl })).get().filter((item) => item.text);
   const callsToAction = $('a,button,input[type="submit"]').map((_, el) => clean($(el).text() || $(el).attr('value') || $(el).attr('aria-label'))).get().filter(Boolean);
   const navigation = $('nav a, header a').map((_, el) => clean($(el).text())).get().filter(Boolean);
 
@@ -105,6 +115,7 @@ export function extractHtmlEvidence(html, pageUrl) {
     page: { url: pageUrl, title, description },
     stylesheets,
     icons,
+    internalLinks,
     images,
     likelyLogos,
     inlineCss: extractCssEvidence(inlineCss, `${pageUrl}#inline-styles`),
