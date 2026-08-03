@@ -13,12 +13,13 @@ export function canonicalizeColor(input) {
   if (NAMED.has(value)) return NAMED.get(value);
   if (/^#[0-9a-f]{3}$/.test(value)) return `#${[...value.slice(1)].map((c) => c + c).join('')}`;
   if (/^#[0-9a-f]{6}$/.test(value)) return value;
-  if (/^#[0-9a-f]{8}$/.test(value)) return value;
+  if (/^#[0-9a-f]{8}$/.test(value)) return value.endsWith('00') ? null : value;
   const rgb = value.match(/^rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*([\d.]+))?\s*\)$/);
   if (rgb) {
     const hex = rgb.slice(1, 4).map((n) => clampByte(n).toString(16).padStart(2, '0')).join('');
     if (rgb[4] !== undefined && Number(rgb[4]) < 1) {
-      return `#${hex}${clampByte(Number(rgb[4]) * 255).toString(16).padStart(2, '0')}`;
+      const alpha = clampByte(Number(rgb[4]) * 255);
+      return alpha === 0 ? null : `#${hex}${alpha.toString(16).padStart(2, '0')}`;
     }
     return `#${hex}`;
   }
