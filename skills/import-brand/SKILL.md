@@ -9,6 +9,12 @@ Use Brand Importer as a temporary, domain-neutral bridge between authorized bran
 
 > Ephemeral intelligence. Portable ownership. Clean disconnection.
 
+## Canonical host integration guide
+
+This skill defines when and how an agent should use Brand Importer. For the complete host-application integration contract—including project discovery, Experience Profiles, Domain Adapters, compatibility negotiation, preview isolation, rights review, and session disposal—read [`HOST_AGENT.md`](../../HOST_AGENT.md).
+
+When this skill and `HOST_AGENT.md` overlap, follow the stricter evidence, rights, compatibility, isolation, and disposal requirement.
+
 ## Core promises
 
 1. Never invent an organization's identity.
